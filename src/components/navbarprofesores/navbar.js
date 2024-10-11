@@ -16,8 +16,8 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 
 const pages = [
-  { name: 'Asignaturas', route: '/paginas/usuarios/asignatura' },
-  { name: 'Calendario', route: '/paginas/usuarios/Calendario' } 
+  { name: 'Asignaturas', route: '/usuarios/asignatura' },
+  { name: 'Calendario', route: '/usuarios/Calendario' } 
 ];
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
