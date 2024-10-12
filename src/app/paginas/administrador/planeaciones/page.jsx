@@ -17,10 +17,10 @@ import {
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
-import Navbar from '@/components/navbar/navbar';
+import Navbar from '@/components/navbaradmins/navbar';
 import Footer from '@/components/footer/footer';
 
-const PaginaPlaneaciones = () => {
+const Page = () => {
   const [planeaciones, setPlaneaciones] = useState([
     { id: 1, nombre: "Matemáticas", area: "Ciencias", estado: "Pendiente" },
     { id: 2, nombre: "Biología", area: "Ciencias", estado: "Pendiente" },
@@ -157,4 +157,4 @@ const PaginaPlaneaciones = () => {
   );
 };
 
-export default PaginaPlaneaciones;
+export default Page;

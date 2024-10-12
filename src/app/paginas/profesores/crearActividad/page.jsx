@@ -19,7 +19,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
 
-const PaginaActividades = () => {
+const Page = () => {
   const [actividades, setActividades] = useState([]);
   const [nuevaActividad, setNuevaActividad] = useState({
     titulo: '',
@@ -168,4 +168,4 @@ const PaginaActividades = () => {
   );
 };
 
-export default PaginaActividades;
+export default Page;

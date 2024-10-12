@@ -6,7 +6,7 @@ import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
 import Paper from "@mui/material/Paper";
 
-const ActivityPage = () => {
+const Page = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [professorFiles] = useState([
     { name: "Documento del Profesor 1", link: "#" },
@@ -118,4 +118,4 @@ const ActivityPage = () => {
   );
 };
 
-export default ActivityPage;
+export default Page;

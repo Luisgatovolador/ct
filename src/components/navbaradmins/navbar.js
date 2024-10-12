@@ -19,7 +19,8 @@ const pages = [
   { name: 'Asignaturas', route: '/paginas/administrador/asignatura' },
   { name: 'Actividades', route: '/paginas/administrador/Actividad' },
   { name: 'Usuarios', route: '/paginas/administrador/crearUsuarios' },
-  { name: 'Calendario', route: '/paginas/administrador/asignatura' } 
+  { name: 'Calendario', route: '/paginas/administrador/asignatura' },
+  { name: 'Planeaciones', route: '/paginas/administrador/planeaciones' } 
 ];
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];

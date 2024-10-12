@@ -24,7 +24,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Navbar from '@/components/navbarprofesores/navbar';
 import Footer from '@/components/footer/footer';
 
-const PaginaActividades = () => {
+const Page = () => {
   const [archivosSubidos, setArchivosSubidos] = useState([]);
   const [busquedaAlumno, setBusquedaAlumno] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
@@ -203,7 +203,7 @@ const PaginaActividades = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Botones para calificar y guardar */}
+                
                   <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
                     Calificar
                   </Button>
@@ -214,7 +214,7 @@ const PaginaActividades = () => {
           </Paper>
         </Container>
 
-        {/* Lista de actividades filtradas */}
+       
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
@@ -250,7 +250,7 @@ const PaginaActividades = () => {
               </Grid>
             </Grid>
 
-            {/* Paginación */}
+           
             {totalPaginas > 1 && (
               <Pagination
                 count={totalPaginas}
@@ -262,11 +262,11 @@ const PaginaActividades = () => {
           </Paper>
         </Container>
 
-        {/* Footer siempre en la parte inferior */}
+        
         <Footer />
       </Box>
     </>
   );
 };
 
-export default PaginaActividades;
+export default Page;

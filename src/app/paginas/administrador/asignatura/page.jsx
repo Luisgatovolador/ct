@@ -1,32 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
-import {
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  TextField,
-  Paper,
-  MenuItem,
-  IconButton,
-  Box,
-  Pagination,
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {Container,Grid,Card,CardContent,Typography,Button,TextField,
+  Paper,MenuItem,IconButton,Box,Pagination,} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import Navbar from '@/components/navbar/navbar';
+import Navbar from '@/components/navbaradmins/navbar';
 import Footer from '@/components/footer/footer';
 
-const PaginaAsignaturas = () => {
-  const [asignaturas, setAsignaturas] = useState([
-    { id: 1, nombre: "Matemáticas", catedratico: ["1", "2"], estudiantes: ["3", "4"], area: "Ciencias" },
-    { id: 2, nombre: "Biología", catedratico: ["3"], estudiantes: ["5"], area: "Ciencias" },
-    { id: 3, nombre: "Historia", catedratico: ["1"], estudiantes: [], area: "Humanidades" }
-  ]);
-
+const Page = () => {
+  const [asignaturas, setAsignaturas] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [filtroArea, setFiltroArea] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
@@ -34,6 +17,23 @@ const PaginaAsignaturas = () => {
   const [nuevoAsignatura, setNuevoAsignatura] = useState({ nombre: "", catedratico: [], estudiantes: [], area: "" });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [asignaturaAEditar, setAsignaturaAEditar] = useState(null);
+
+  // Obtener las asignaturas del backend al cargar el componente
+  useEffect(() => {
+    const fetchAsignaturas = async () => {
+      try {
+        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura/');
+        const data = await response.json();
+        console.log(data)
+        setAsignaturas(data);
+
+      } catch (error) {
+        console.error('Error al obtener las asignaturas:', error);
+      }
+    };
+
+    fetchAsignaturas();
+  }, []);
 
   // Filtro por nombre y área
   const asignaturasFiltradas = asignaturas.filter((asignatura) =>
@@ -45,23 +45,63 @@ const PaginaAsignaturas = () => {
   const asignaturasPaginadas = asignaturasFiltradas.slice(inicioPagina, inicioPagina + asignaturasPorPagina);
   const totalPaginas = Math.ceil(asignaturasFiltradas.length / asignaturasPorPagina);
 
-  const manejarAgregarAsignatura = () => {
-    if (modoEdicion) {
-      setAsignaturas(asignaturas.map(asignatura => asignatura.id === asignaturaAEditar.id ? { ...asignaturaAEditar, ...nuevoAsignatura } : asignatura));
-      setModoEdicion(false);
-      setAsignaturaAEditar(null);
-    } else {
-      const nuevoId = asignaturas.length ? Math.max(...asignaturas.map(asignatura => asignatura.id)) + 1 : 1;
-      const asignaturaConId = { id: nuevoId, ...nuevoAsignatura };
-      setAsignaturas([...asignaturas, asignaturaConId]);
+  // Manejar agregar o actualizar asignatura
+  const manejarAgregarAsignatura = async () => {
+    try {
+      if (modoEdicion) {
+       
+        const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/asignatura/${asignaturaAEditar._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevoAsignatura),
+        });
+
+        if (response.ok) {
+          const updatedAsignatura = await response.json();
+          setAsignaturas(asignaturas.map(asignatura => asignatura.id === updatedAsignatura.id ? updatedAsignatura : asignatura));
+          setModoEdicion(false);
+          setAsignaturaAEditar(null);
+        }
+      } else {
+        // Crear nueva asignatura
+        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevoAsignatura),
+        });
+
+        if (response.ok) {
+          const nuevaAsignatura = await response.json();
+          setAsignaturas([...asignaturas, nuevaAsignatura]);
+        }
+      }
+
+      setNuevoAsignatura({ nombre: "", catedratico: [], estudiantes: [], area: "" });
+    } catch (error) {
+      console.error('Error al agregar o actualizar la asignatura:', error);
     }
-    setNuevoAsignatura({ nombre: "", catedratico: [], estudiantes: [], area: "" });
   };
 
-  const manejarEliminarAsignatura = (id) => {
-    setAsignaturas(asignaturas.filter(asignatura => asignatura.id !== id));
+  // Manejar eliminar asignatura
+  const manejarEliminarAsignatura = async (id) => {
+    try {
+      const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/asignatura/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setAsignaturas(asignaturas.filter(asignatura => asignatura.id !== id));
+      }
+    } catch (error) {
+      console.error('Error al eliminar la asignatura:', error);
+    }
   };
 
+  // Preparar edición de asignatura
   const manejarEditarAsignatura = (asignatura) => {
     setModoEdicion(true);
     setAsignaturaAEditar(asignatura);
@@ -71,11 +111,20 @@ const PaginaAsignaturas = () => {
   return (
     <>
       <Navbar />
+  
+      <div className='px-44'>
+        <br />
+      <Typography variant="h4" component="h2" gutterBottom style={""}>
+            Administracion de Asignaturas
+      </Typography>
 
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        
+
+        <div className="grid grid-cols-2 gap-10"> 
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            {/* Filtro por nombre y área */}
+            
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
@@ -106,17 +155,16 @@ const PaginaAsignaturas = () => {
                   color="primary"
                   fullWidth
                   sx={{ height: '100%' }}
-                  onClick={() => setBusquedaNombre("")} // Reiniciar búsqueda
+                  onClick={() => setBusquedaNombre("")} 
                 >
                   Buscar
                 </Button>
               </Grid>
             </Grid>
           </Paper>
-        </Container>
+        
+        <br />
 
-        {/* Panel para agregar y editar asignaturas */}
-        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
               {modoEdicion ? "Editar Asignatura" : "Agregar Nueva Asignatura"}
@@ -140,13 +188,14 @@ const PaginaAsignaturas = () => {
                   onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, area: e.target.value })}
                 />
               </Grid>
-              {/* Catedráticos y Estudiantes pueden ser ingresados como texto por simplicidad */}
+
+             
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Catedrático (separar por comas)"
                   variant="outlined"
                   fullWidth
-                  value={nuevoAsignatura.catedratico.join(", ")}
+                  value={nuevoAsignatura.catedratico}
                   onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, catedratico: e.target.value.split(",").map(item => item.trim()) })}
                 />
               </Grid>
@@ -155,7 +204,7 @@ const PaginaAsignaturas = () => {
                   label="Estudiantes (separar por comas)"
                   variant="outlined"
                   fullWidth
-                  value={nuevoAsignatura.estudiantes.join(", ")}
+                  value={nuevoAsignatura.estudiantes}
                   onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, estudiantes: e.target.value.split(",").map(item => item.trim()) })}
                 />
               </Grid>
@@ -172,7 +221,7 @@ const PaginaAsignaturas = () => {
           </Paper>
         </Container>
 
-        {/* Lista de asignaturas filtradas */}
+        
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
@@ -186,15 +235,16 @@ const PaginaAsignaturas = () => {
                       <Card key={asignatura.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <CardContent sx={{ flexGrow: 1 }}>
                           <Typography variant="h6">{asignatura.nombre}</Typography>
+                          <Typography color="textSecondary">Área: {asignatura._id}</Typography>
                           <Typography color="textSecondary">Área: {asignatura.area}</Typography>
-                          <Typography color="textSecondary">Catedrático: {asignatura.catedratico.join(", ")}</Typography>
-                          <Typography color="textSecondary">Estudiantes: {asignatura.estudiantes.join(", ")}</Typography>
+                          <Typography color="textSecondary">Catedrático: {asignatura.catedratico}</Typography>
+                          <Typography color="textSecondary">Estudiantes: {asignatura.estudiantes}</Typography>
                         </CardContent>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                           <IconButton color="primary" onClick={() => manejarEditarAsignatura(asignatura)}>
                             <EditIcon />
                           </IconButton>
-                          <IconButton color="error" onClick={() => manejarEliminarAsignatura(asignatura.id)}>
+                          <IconButton color="error" onClick={() => manejarEliminarAsignatura(asignatura._id)}>
                             <DeleteIcon />
                           </IconButton>
                         </Box>
@@ -218,12 +268,16 @@ const PaginaAsignaturas = () => {
             )}
           </Paper>
         </Container>
+        </div>
 
-        {/* Footer siempre en la parte inferior */}
-        <Footer />
+        
+        
       </Box>
+
+      </div>
+      <Footer />
     </>
   );
 };
 
-export default PaginaAsignaturas;
+export default Page;

@@ -23,6 +23,7 @@ export default function Home() {
           <Typography variant="h4" component="h2" gutterBottom>
             Asignaturas
           </Typography>
+          
           <div className="grid grid-cols-3 gap-10">
             {Asignaturas.map((asignatura, i) => (
               <Card key={i} sx={{ maxWidth: 345 }}>

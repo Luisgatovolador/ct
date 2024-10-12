@@ -22,7 +22,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const CalendarPage = () => {
+const Page = () => {
   const actividades = [
     {
       _id: "1",
@@ -99,4 +99,4 @@ const CalendarPage = () => {
   );
 };
 
-export default CalendarPage;
+export default Page;

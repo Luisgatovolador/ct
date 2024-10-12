@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Grid,
@@ -8,9 +8,6 @@ import {
   CardContent,
   Typography,
   Button,
-  List,
-  ListItem,
-  ListItemText,
   Box,
   TextField,
   Paper,
@@ -23,19 +20,29 @@ import EditIcon from '@mui/icons-material/Edit';
 import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
 
-const PaginaUsuarios = () => {
-  const [usuarios, setUsuarios] = useState([
-    { id: 1, nombre: "Juan Pérez", email: "juan@example.com", rol: "Profesor", asignaturas: ["Matemáticas"], fechaRegistro: new Date().toLocaleDateString() },
-    { id: 2, nombre: "Ana García", email: "ana@example.com", rol: "Estudiante", area: "Ciencias", asignaturas: ["Biología"], fechaRegistro: new Date().toLocaleDateString() },
-    { id: 3, nombre: "Luis Martínez", email: "luis@example.com", rol: "Administrador", fechaRegistro: new Date().toLocaleDateString() }
-  ]);
-
+const Page = () => {
+  const [usuarios, setUsuarios] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
-  const [paginaActual, setPaginaActual] = useState(1); // Página actual para la paginación
-  const usuariosPorPagina = 5; // Número de usuarios por página
-  const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: "", email: "", rol: "", asignaturas: [], area: "" }); // Estado para nuevo usuario
-  const [modoEdicion, setModoEdicion] = useState(false); // Estado para saber si se está editando un usuario
-  const [usuarioAEditar, setUsuarioAEditar] = useState(null); // Estado para usuario a editar
+  const [paginaActual, setPaginaActual] = useState(1);
+  const usuariosPorPagina = 5;
+  const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: "", email: "", rol: "", asignaturas: [], area: "" });
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [usuarioAEditar, setUsuarioAEditar] = useState(null);
+
+  // Obtener los usuarios del backend al cargar el componente
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        const response = await fetch('/api/usuarios');
+        const data = await response.json();
+        setUsuarios(data);
+      } catch (error) {
+        console.error('Error al obtener los usuarios:', error);
+      }
+    };
+
+    fetchUsuarios();
+  }, []);
 
   // Filtro por nombre del usuario
   const usuariosFiltrados = usuarios.filter((usuario) =>
@@ -47,25 +54,63 @@ const PaginaUsuarios = () => {
   const usuariosPaginados = usuariosFiltrados.slice(inicioPagina, inicioPagina + usuariosPorPagina);
   const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
 
-  const manejarAgregarUsuario = () => {
-    if (modoEdicion) {
-      // Actualizar usuario
-      setUsuarios(usuarios.map(usuario => usuario.id === usuarioAEditar.id ? { ...usuarioAEditar, ...nuevoUsuario } : usuario));
-      setModoEdicion(false);
-      setUsuarioAEditar(null);
-    } else {
-      // Agregar nuevo usuario
-      const nuevoId = usuarios.length ? Math.max(...usuarios.map(usuario => usuario.id)) + 1 : 1;
-      const usuarioConId = { id: nuevoId, fechaRegistro: new Date().toLocaleDateString(), ...nuevoUsuario };
-      setUsuarios([...usuarios, usuarioConId]);
+  // Agregar o actualizar un usuario en la base de datos
+  const manejarAgregarUsuario = async () => {
+    try {
+      if (modoEdicion) {
+        // Actualizar usuario
+        const response = await fetch(`/api/usuarios/${usuarioAEditar.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevoUsuario),
+        });
+
+        if (response.ok) {
+          const updatedUsuario = await response.json();
+          setUsuarios(usuarios.map(usuario => (usuario.id === updatedUsuario.id ? updatedUsuario : usuario)));
+          setModoEdicion(false);
+          setUsuarioAEditar(null);
+        }
+      } else {
+        // Crear nuevo usuario
+        const response = await fetch('/api/usuarios', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevoUsuario),
+        });
+
+        if (response.ok) {
+          const nuevoUsuarioResponse = await response.json();
+          setUsuarios([...usuarios, nuevoUsuarioResponse]);
+        }
+      }
+
+      setNuevoUsuario({ nombre: "", email: "", rol: "", asignaturas: [], area: "" });
+    } catch (error) {
+      console.error('Error al agregar o actualizar el usuario:', error);
     }
-    setNuevoUsuario({ nombre: "", email: "", rol: "", asignaturas: [], area: "" }); // Reiniciar el formulario
   };
 
-  const manejarEliminarUsuario = (id) => {
-    setUsuarios(usuarios.filter(usuario => usuario.id !== id));
+  // Eliminar un usuario de la base de datos
+  const manejarEliminarUsuario = async (id) => {
+    try {
+      const response = await fetch(`/api/usuarios/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setUsuarios(usuarios.filter(usuario => usuario.id !== id));
+      }
+    } catch (error) {
+      console.error('Error al eliminar el usuario:', error);
+    }
   };
 
+  // Preparar la edición de un usuario
   const manejarEditarUsuario = (usuario) => {
     setModoEdicion(true);
     setUsuarioAEditar(usuario);
@@ -90,15 +135,13 @@ const PaginaUsuarios = () => {
                   onChange={(e) => setBusquedaNombre(e.target.value)}
                 />
               </Grid>
-
-              {/* Botón de búsqueda */}
               <Grid item xs={12} md={2}>
                 <Button
                   variant="contained"
                   color="primary"
                   fullWidth
                   sx={{ height: '100%' }}
-                  onClick={() => setBusquedaNombre("")} // Reiniciar búsqueda
+                  onClick={() => setBusquedaNombre("")}
                 >
                   Buscar
                 </Button>
@@ -233,11 +276,10 @@ const PaginaUsuarios = () => {
           </Paper>
         </Container>
 
-        {/* Footer siempre en la parte inferior */}
         <Footer />
       </Box>
     </>
   );
 };
 
-export default PaginaUsuarios;
+export default Page;
