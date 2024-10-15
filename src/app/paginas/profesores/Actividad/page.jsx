@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Grid,
@@ -21,45 +21,57 @@ import {
   Pagination
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Navbar from '@/components/navbarprofesores/navbar';
+import Navbar from '@/components/Navbars/navbarprofesores/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {
   const [archivosSubidos, setArchivosSubidos] = useState([]);
   const [busquedaAlumno, setBusquedaAlumno] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
-  const [paginaActual, setPaginaActual] = useState(1); // Página actual para la paginación
-  const tareasPorPagina = 5; // Número de tareas por página
-  const [calificacion, setCalificacion] = useState(""); // Estado para la calificación
-  const [retroalimentacion, setRetroalimentacion] = useState(""); // Estado para la retroalimentación
+  const [paginaActual, setPaginaActual] = useState(1);
+  const tareasPorPagina = 5;
+  const [calificacion, setCalificacion] = useState("");
+  const [retroalimentacion, setRetroalimentacion] = useState("");
+  const [tareas, setTareas] = useState([]); // Estado para almacenar las tareas desde la DB
 
-  const [archivosProfesor] = useState([
-    { name: "Documento del Profesor 1", link: "#" },
-    { name: "Documento del Profesor 2", link: "#" },
-  ]);
-
-  const tareas = [
-    { titulo: "Tarea 1", descripcion: "Descripción de la Tarea 1", estado: "Pendiente", alumno: "Karime Alejandra Caballero Campos" },
-    { titulo: "Tarea 2", descripcion: "Descripción de la Tarea 2", estado: "Completada", alumno: "Luis Oswaldo Rodríguez López" },
-    { titulo: "Tarea 3", descripcion: "Descripción de la Tarea 3", estado: "Pendiente", alumno: "Oscar Daniel Morales Navarro" },
-    { titulo: "Tarea 4", descripcion: "Descripción de la Tarea 4", estado: "Completada", alumno: "Karime Alejandra Caballero Campos" },
-    { titulo: "Tarea 5", descripcion: "Descripción de la Tarea 5", estado: "Pendiente", alumno: "Oscar Daniel Morales Navarro" },
-    { titulo: "Tarea 6", descripcion: "Descripción de la Tarea 6", estado: "Pendiente", alumno: "Luis Oswaldo Rodríguez López" },
-    { titulo: "Tarea 7", descripcion: "Descripción de la Tarea 7", estado: "Completada", alumno: "Karime Alejandra Caballero Campos" },
-  ];
-
-  const manejarSubidaArchivos = (event) => {
-    const files = event.target.files;
-    const nuevosArchivos = [];
-    for (let i = 0; i < files.length; i++) {
-      nuevosArchivos.push(files[i].name);
+  // 1. Cargar tareas desde la base de datos al montar el componente
+  useEffect(() => {
+    async function obtenerTareas() {
+      try {
+        const response = await fetch('/api/tareas'); // Aquí llamas a tu método para obtener las tareas
+        const data = await response.json();
+        setTareas(data);
+      } catch (error) {
+        console.error("Error al obtener las tareas", error);
+      }
     }
-    setArchivosSubidos([...archivosSubidos, ...nuevosArchivos]);
+    
+    obtenerTareas();
+  }, []);
+
+  // 2. Función para actualizar la calificación de una tarea
+  const manejarCalificacion = async (tareaId) => {
+    try {
+      await fetch(`/api/tareas/${tareaId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ calificacion, retroalimentacion })
+      });
+      // Actualiza las tareas en el frontend después de calificar
+      const nuevasTareas = tareas.map((tarea) =>
+        tarea.id === tareaId ? { ...tarea, calificacion, retroalimentacion } : tarea
+      );
+      setTareas(nuevasTareas);
+    } catch (error) {
+      console.error("Error al calificar la tarea", error);
+    }
   };
 
   // Filtro por nombre del alumno y estado
   const tareasFiltradas = tareas
-    .filter((tarea) => 
+    .filter((tarea) =>
       tarea.alumno.toLowerCase().includes(busquedaAlumno.toLowerCase()) &&
       (filtroEstado === "" || tarea.estado === filtroEstado)
     );
@@ -76,7 +88,6 @@ const Page = () => {
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            
             {/* Filtros y navegación arriba */}
             <Grid container spacing={2}>
               {/* Filtro por estado */}
@@ -93,15 +104,6 @@ const Page = () => {
                   <MenuItem value="Pendiente">Pendiente</MenuItem>
                   <MenuItem value="Completada">Completada</MenuItem>
                 </TextField>
-              </Grid>
-
-              {/* Filtro por grupo (placeholder para futuras implementaciones) */}
-              <Grid item xs={12} md={3}>
-                <TextField
-                  label="Grupo"
-                  variant="outlined"
-                  fullWidth
-                />
               </Grid>
 
               {/* Filtro por nombre del alumno */}
@@ -122,6 +124,7 @@ const Page = () => {
                   color="primary"
                   fullWidth
                   sx={{ height: '100%' }}
+                  onClick={() => setPaginaActual(1)}
                 >
                   Buscar
                 </Button>
@@ -130,66 +133,17 @@ const Page = () => {
           </Paper>
         </Container>
 
-        {/* Panel para calificar y retroalimentar (Actividad principal) */}
+        {/* Panel para calificar y retroalimentar */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <div className="px-75" style={{ flexGrow: 1 }}>
               <Grid container spacing={2}>
-                {/* Sección Principal Izquierda */}
-                <Grid item xs={12} md={8}>
-                  <Card>
-                    <CardContent>
-                      {/* Detalles de la actividad */}
-                      <Typography variant="h5" gutterBottom>
-                        Karime Alejandra Caballero Campos
-                      </Typography>
-                      <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-                        Fecha de entrega: 20 de Octubre de 2024
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        Descripción de la actividad. Aquí se muestra una descripción detallada de la tarea que el alumno debe realizar.
-                      </Typography>
-
-                      {/* Archivos agregados por el profesor */}
-                      <Typography variant="h6" gutterBottom>
-                        Documentos del Alumno
-                      </Typography>
-                      <List>
-                        {archivosProfesor.map((file, index) => (
-                          <ListItem key={index} button component="a" href={file.link}>
-                            <ListItemText primary={file.name} />
-                          </ListItem>
-                        ))}
-                      </List>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Panel Derecho */}
+                {/* Panel derecho para calificación y retroalimentación */}
                 <Grid item xs={12} md={4}>
-                  {/* Agregar retroalimentación */}
-                  <Card sx={{ mb: 2 }}>
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                        Agregar retroalimentación
-                      </Typography>
-                      <TextField
-                        label="Retroalimentación"
-                        variant="outlined"
-                        fullWidth
-                        multiline
-                        rows={4}
-                        value={retroalimentacion}
-                        onChange={(e) => setRetroalimentacion(e.target.value)}
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Asignar calificación */}
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
-                        Asignar calificación (1/10)
+                        Asignar calificación
                       </Typography>
                       <TextField
                         label="Calificación"
@@ -200,21 +154,33 @@ const Page = () => {
                         value={calificacion}
                         onChange={(e) => setCalificacion(e.target.value)}
                       />
+                      <TextField
+                        label="Retroalimentación"
+                        variant="outlined"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={retroalimentacion}
+                        onChange={(e) => setRetroalimentacion(e.target.value)}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                        onClick={() => manejarCalificacion(selectedTareaId)} // Aquí pasarías el ID de la tarea seleccionada
+                      >
+                        Calificar
+                      </Button>
                     </CardContent>
                   </Card>
-
-                
-                  <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-                    Calificar
-                  </Button>
-                  
                 </Grid>
               </Grid>
             </div>
           </Paper>
         </Container>
 
-       
+        {/* Mostrar las tareas de los alumnos */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
@@ -235,7 +201,7 @@ const Page = () => {
                         </AccordionSummary>
                         <AccordionDetails>
                           <Typography>{tarea.descripcion}</Typography>
-                          <Button size="small" sx={{ marginTop: 1 }}>
+                          <Button size="small" sx={{ marginTop: 1 }} onClick={() => setSelectedTareaId(tarea.id)}>
                             Calificar
                           </Button>
                         </AccordionDetails>
@@ -250,7 +216,7 @@ const Page = () => {
               </Grid>
             </Grid>
 
-           
+            {/* Paginación */}
             {totalPaginas > 1 && (
               <Pagination
                 count={totalPaginas}
@@ -262,7 +228,6 @@ const Page = () => {
           </Paper>
         </Container>
 
-        
         <Footer />
       </Box>
     </>

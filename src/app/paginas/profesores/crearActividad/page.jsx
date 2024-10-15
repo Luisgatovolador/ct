@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Grid,
@@ -12,11 +12,10 @@ import {
   ListItem,
   ListItemText,
   Box,
-  MenuItem,
   IconButton
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Navbar from '@/components/navbar/navbar';
+import Navbar from '@/components/Navbars/navbarUsuarios/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {
@@ -29,7 +28,22 @@ const Page = () => {
     planeacionID: ''
   });
 
-  const manejarAgregarActividad = () => {
+  // Cargar actividades desde la base de datos cuando el componente se monta
+  useEffect(() => {
+    const fetchActividades = async () => {
+      try {
+        const response = await fetch('/api/actividades'); // Aquí haces una petición GET a tu API
+        const data = await response.json();
+        setActividades(data);
+      } catch (error) {
+        console.error('Error al cargar actividades:', error);
+      }
+    };
+    fetchActividades();
+  }, []);
+
+  // Manejar el agregar actividad
+  const manejarAgregarActividad = async () => {
     if (
       nuevaActividad.titulo &&
       nuevaActividad.descripcion &&
@@ -37,22 +51,52 @@ const Page = () => {
       nuevaActividad.fechaFin &&
       nuevaActividad.planeacionID
     ) {
-      setActividades([...actividades, { ...nuevaActividad }]);
-      setNuevaActividad({
-        titulo: '',
-        descripcion: '',
-        fechaInicio: '',
-        fechaFin: '',
-        planeacionID: ''
-      });
+      try {
+        const response = await fetch('/api/actividades', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevaActividad),
+        });
+
+        if (response.ok) {
+          const actividadGuardada = await response.json();
+          setActividades([...actividades, actividadGuardada]);
+          setNuevaActividad({
+            titulo: '',
+            descripcion: '',
+            fechaInicio: '',
+            fechaFin: '',
+            planeacionID: ''
+          });
+        } else {
+          console.error('Error al agregar actividad');
+        }
+      } catch (error) {
+        console.error('Error al agregar actividad:', error);
+      }
     } else {
-      alert("Por favor, completa todos los campos.");
+      alert('Por favor, completa todos los campos.');
     }
   };
 
-  const manejarEliminarActividad = (index) => {
-    const actividadesActualizadas = actividades.filter((_, i) => i !== index);
-    setActividades(actividadesActualizadas);
+  // Manejar eliminar actividad
+  const manejarEliminarActividad = async (id, index) => {
+    try {
+      const response = await fetch(`/api/actividades/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const actividadesActualizadas = actividades.filter((_, i) => i !== index);
+        setActividades(actividadesActualizadas);
+      } else {
+        console.error('Error al eliminar actividad');
+      }
+    } catch (error) {
+      console.error('Error al eliminar actividad:', error);
+    }
   };
 
   return (
@@ -142,7 +186,7 @@ const Page = () => {
               {actividades.length > 0 ? (
                 actividades.map((actividad, index) => (
                   <ListItem key={index} secondaryAction={
-                    <IconButton edge="end" aria-label="delete" onClick={() => manejarEliminarActividad(index)}>
+                    <IconButton edge="end" aria-label="delete" onClick={() => manejarEliminarActividad(actividad.id, index)}>
                       <DeleteIcon />
                     </IconButton>
                   }>
@@ -161,7 +205,7 @@ const Page = () => {
           </Paper>
         </Container>
 
-        {/* Footer siempre en la parte inferior */}
+        {/* Footer */}
         <Footer />
       </Box>
     </>

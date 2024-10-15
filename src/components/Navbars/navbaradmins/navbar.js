@@ -16,8 +16,11 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 
 const pages = [
-  { name: 'Asignaturas', route: '/usuarios/asignatura' },
-  { name: 'Calendario', route: '/usuarios/Calendario' } 
+  { name: 'Asignaturas', route: '/paginas/administrador/asignatura' },
+  { name: 'Profesores', route: '/paginas/administrador/crearProfesor' },
+  { name: 'Alumnos', route: '/paginas/administrador/crearUsuarios' },
+  { name: 'Administradores', route: '/paginas/administrador/crearAdmins' },
+  { name: 'Planeaciones', route: '/paginas/administrador/planeaciones' } 
 ];
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -52,7 +55,7 @@ function Navbar() {
             variant="h6"
             noWrap
             component="a"
-            href="/"
+            href="/paginas/administrador/Home"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },

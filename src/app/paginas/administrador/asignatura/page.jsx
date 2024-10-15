@@ -5,7 +5,7 @@ import {Container,Grid,Card,CardContent,Typography,Button,TextField,
   Paper,MenuItem,IconButton,Box,Pagination,} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import Navbar from '@/components/navbaradmins/navbar';
+import Navbar from '@/components/Navbars/navbaradmins/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {
@@ -24,7 +24,6 @@ const Page = () => {
       try {
         const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura/');
         const data = await response.json();
-        console.log(data)
         setAsignaturas(data);
 
       } catch (error) {
@@ -63,10 +62,12 @@ const Page = () => {
           setAsignaturas(asignaturas.map(asignatura => asignatura.id === updatedAsignatura.id ? updatedAsignatura : asignatura));
           setModoEdicion(false);
           setAsignaturaAEditar(null);
+          window.location.reload()
         }
+       
       } else {
         // Crear nueva asignatura
-        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura/', {
+        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -77,6 +78,7 @@ const Page = () => {
         if (response.ok) {
           const nuevaAsignatura = await response.json();
           setAsignaturas([...asignaturas, nuevaAsignatura]);
+          window.location.reload()
         }
       }
 
@@ -95,7 +97,9 @@ const Page = () => {
 
       if (response.ok) {
         setAsignaturas(asignaturas.filter(asignatura => asignatura.id !== id));
+        window.location.reload()
       }
+     
     } catch (error) {
       console.error('Error al eliminar la asignatura:', error);
     }

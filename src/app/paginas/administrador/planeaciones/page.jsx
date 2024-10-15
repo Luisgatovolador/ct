@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
-import Navbar from '@/components/navbaradmins/navbar';
+import Navbar from '@/components/Navbars/navbaradmins/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {

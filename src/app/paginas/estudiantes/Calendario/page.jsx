@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { es } from "date-fns/locale";
 import { Container, Typography } from "@mui/material";
-import Navbar from "@/components/navbar/navbar";
+import Navbar from "@/components/Navbars/navbarUsuarios/navbar";
 import Footer from "@/components/footer/footer";
 
 // Configuración de locales para el calendario en español
@@ -23,49 +23,47 @@ const localizer = dateFnsLocalizer({
 });
 
 const Page = () => {
-  const actividades = [
-    {
-      _id: "1",
-      planeacionID: "123",
-      titulo: "Revisión de Proyectos",
-      descripcion: "Revisar los proyectos entregados.",
-      fechaInicio: new Date(2024, 9, 15),
-      fechaFin: new Date(2024, 9, 17),
-      tareas: ["tarea1", "tarea2"],
-    },
-    {
-      _id: "2",
-      planeacionID: "124",
-      titulo: "Entrega de reportes",
-      descripcion: "Entrega de reportes de los avances.",
-      fechaInicio: new Date(2024, 9, 20),
-      fechaFin: new Date(2024, 9, 20),
-      tareas: ["tarea3"],
-    },
-    {
-      _id: "3",
-      planeacionID: "124",
-      titulo: "Proyecto",
-      descripcion: "Entrega de reportes de los avances.",
-      fechaInicio: new Date(2024, 11, 20),
-      fechaFin: new Date(2024, 11, 21),
-      tareas: ["tarea4"],
-    },
-  ];
+  const [actividades, setActividades] = useState([]);
+
+  // Obtener las actividades desde el backend cuando se carga la página
+  useEffect(() => {
+    const fetchActividades = async () => {
+      try {
+        const response = await fetch("/api/actividades");
+        const data = await response.json();
+        setActividades(data);
+      } catch (error) {
+        console.error("Error al cargar las actividades:", error);
+      }
+    };
+
+    fetchActividades();
+  }, []);
 
   // Mapeo de las actividades a eventos que el calendario pueda mostrar
   const [eventos, setEventos] = useState(
     actividades.map((actividad) => ({
       title: actividad.titulo,
-      start: actividad.fechaInicio,
-      end: actividad.fechaFin,
+      start: new Date(actividad.fechaInicio),
+      end: new Date(actividad.fechaFin),
       allDay: true,
     }))
   );
 
+  useEffect(() => {
+    setEventos(
+      actividades.map((actividad) => ({
+        title: actividad.titulo,
+        start: new Date(actividad.fechaInicio),
+        end: new Date(actividad.fechaFin),
+        allDay: true,
+      }))
+    );
+  }, [actividades]);
+
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
       <br />
       <Container>
         <Typography variant="h4" gutterBottom>
@@ -94,7 +92,7 @@ const Page = () => {
         />
       </Container>
       <br />
-      <Footer></Footer>
+      <Footer />
     </>
   );
 };

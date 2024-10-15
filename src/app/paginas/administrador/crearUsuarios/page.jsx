@@ -17,104 +17,108 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import Navbar from '@/components/navbar/navbar';
+import Navbar from '@/components/Navbars/navbaradmins/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {
-  const [usuarios, setUsuarios] = useState([]);
+  const [estudiantes, setEstudiantes] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
+  const [busquedaGrupo, setBusquedaGrupo] = useState("");
+  const [busquedaArea, setBusquedaArea] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
-  const usuariosPorPagina = 5;
-  const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: "", email: "", rol: "", asignaturas: [], area: "" });
+  const estudiantesPorPagina = 5;
+  const [nuevoEstudiante, setNuevoEstudiante] = useState({ nombre: "", email: "", grupo: "", area: "", asignaturas: [] });
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [usuarioAEditar, setUsuarioAEditar] = useState(null);
+  const [estudianteAEditar, setEstudianteAEditar] = useState(null);
 
-  // Obtener los usuarios del backend al cargar el componente
+  // Obtener los estudiantes del backend al cargar el componente
   useEffect(() => {
-    const fetchUsuarios = async () => {
+    const fetchEstudiantes = async () => {
       try {
-        const response = await fetch('/api/usuarios');
+        const response = await fetch('/api/estudiantes');
         const data = await response.json();
-        setUsuarios(data);
+        setEstudiantes(data);
       } catch (error) {
-        console.error('Error al obtener los usuarios:', error);
+        console.error('Error al obtener los estudiantes:', error);
       }
     };
 
-    fetchUsuarios();
+    fetchEstudiantes();
   }, []);
 
-  // Filtro por nombre del usuario
-  const usuariosFiltrados = usuarios.filter((usuario) =>
-    usuario.nombre.toLowerCase().includes(busquedaNombre.toLowerCase())
+  // Filtro por nombre, grupo y área del estudiante
+  const estudiantesFiltrados = estudiantes.filter((estudiante) =>
+    estudiante.nombre.toLowerCase().includes(busquedaNombre.toLowerCase()) &&
+    estudiante.grupo.toLowerCase().includes(busquedaGrupo.toLowerCase()) &&
+    estudiante.area.toLowerCase().includes(busquedaArea.toLowerCase())
   );
 
-  // Paginación de los usuarios
-  const inicioPagina = (paginaActual - 1) * usuariosPorPagina;
-  const usuariosPaginados = usuariosFiltrados.slice(inicioPagina, inicioPagina + usuariosPorPagina);
-  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+  // Paginación de los estudiantes
+  const inicioPagina = (paginaActual - 1) * estudiantesPorPagina;
+  const estudiantesPaginados = estudiantesFiltrados.slice(inicioPagina, inicioPagina + estudiantesPorPagina);
+  const totalPaginas = Math.ceil(estudiantesFiltrados.length / estudiantesPorPagina);
 
-  // Agregar o actualizar un usuario en la base de datos
-  const manejarAgregarUsuario = async () => {
+  // Agregar o actualizar un estudiante en la base de datos
+  const manejarAgregarEstudiante = async () => {
     try {
       if (modoEdicion) {
-        // Actualizar usuario
-        const response = await fetch(`/api/usuarios/${usuarioAEditar.id}`, {
+        // Actualizar estudiante
+        const response = await fetch(`/api/estudiantes/${estudianteAEditar.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(nuevoUsuario),
+          body: JSON.stringify(nuevoEstudiante),
         });
 
         if (response.ok) {
-          const updatedUsuario = await response.json();
-          setUsuarios(usuarios.map(usuario => (usuario.id === updatedUsuario.id ? updatedUsuario : usuario)));
+          const updatedEstudiante = await response.json();
+          setEstudiantes(estudiantes.map(est => (est.id === updatedEstudiante.id ? updatedEstudiante : est)));
           setModoEdicion(false);
-          setUsuarioAEditar(null);
+          setEstudianteAEditar(null);
         }
       } else {
-        // Crear nuevo usuario
-        const response = await fetch('/api/usuarios', {
+        // Crear nuevo estudiante
+        const response = await fetch('/api/estudiantes', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(nuevoUsuario),
+          body: JSON.stringify(nuevoEstudiante),
         });
 
         if (response.ok) {
-          const nuevoUsuarioResponse = await response.json();
-          setUsuarios([...usuarios, nuevoUsuarioResponse]);
+          const nuevoEstudianteResponse = await response.json();
+          setEstudiantes([...estudiantes, nuevoEstudianteResponse]);
         }
       }
 
-      setNuevoUsuario({ nombre: "", email: "", rol: "", asignaturas: [], area: "" });
+      setNuevoEstudiante({ nombre: "", email: "", grupo: "", area: "", asignaturas: [] });
     } catch (error) {
-      console.error('Error al agregar o actualizar el usuario:', error);
+      console.error('Error al agregar o actualizar el estudiante:', error);
     }
   };
 
-  // Eliminar un usuario de la base de datos
-  const manejarEliminarUsuario = async (id) => {
+  // Eliminar un estudiante de la base de datos
+  const manejarEliminarEstudiante = async (id) => {
     try {
-      const response = await fetch(`/api/usuarios/${id}`, {
+      const response = await fetch(`/api/estudiantes/${id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setUsuarios(usuarios.filter(usuario => usuario.id !== id));
+        setEstudiantes(estudiantes.filter(est => est.id !== id));
       }
     } catch (error) {
-      console.error('Error al eliminar el usuario:', error);
+      console.error('Error al eliminar el estudiante:', error);
     }
   };
 
-  // Preparar la edición de un usuario
-  const manejarEditarUsuario = (usuario) => {
+  // Preparar la edición de un estudiante
+  const manejarEditarEstudiante = (estudiante) => {
     setModoEdicion(true);
-    setUsuarioAEditar(usuario);
-    setNuevoUsuario({ nombre: usuario.nombre, email: usuario.email, rol: usuario.rol, asignaturas: usuario.asignaturas || [], area: usuario.area || "" });
+    setEstudianteAEditar(estudiante);
+    setNuevoEstudiante({ nombre: estudiante.nombre, email: estudiante.email, grupo: estudiante.grupo, area: estudiante.area, asignaturas: estudiante.asignaturas || [] });
   };
 
   return (
@@ -124,37 +128,44 @@ const Page = () => {
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            {/* Filtro por nombre */}
+            {/* Filtro por nombre, grupo y área */}
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
                 <TextField
-                  label="Buscar usuario por nombre"
+                  label="Buscar por nombre"
                   variant="outlined"
                   fullWidth
                   value={busquedaNombre}
                   onChange={(e) => setBusquedaNombre(e.target.value)}
                 />
               </Grid>
-              <Grid item xs={12} md={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Buscar por grupo"
+                  variant="outlined"
                   fullWidth
-                  sx={{ height: '100%' }}
-                  onClick={() => setBusquedaNombre("")}
-                >
-                  Buscar
-                </Button>
+                  value={busquedaGrupo}
+                  onChange={(e) => setBusquedaGrupo(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Buscar por área"
+                  variant="outlined"
+                  fullWidth
+                  value={busquedaArea}
+                  onChange={(e) => setBusquedaArea(e.target.value)}
+                />
               </Grid>
             </Grid>
           </Paper>
         </Container>
 
-        {/* Panel para agregar y editar usuarios */}
+        {/* Panel para agregar y editar estudiantes */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
-              {modoEdicion ? "Editar Usuario" : "Agregar Nuevo Usuario"}
+              {modoEdicion ? "Editar Estudiante" : "Agregar Nuevo Estudiante"}
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
@@ -162,8 +173,8 @@ const Page = () => {
                   label="Nombre"
                   variant="outlined"
                   fullWidth
-                  value={nuevoUsuario.nombre}
-                  onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, nombre: e.target.value })}
+                  value={nuevoEstudiante.nombre}
+                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, nombre: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -171,108 +182,93 @@ const Page = () => {
                   label="Email"
                   variant="outlined"
                   fullWidth
-                  value={nuevoUsuario.email}
-                  onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, email: e.target.value })}
+                  value={nuevoEstudiante.email}
+                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, email: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
-                  select
-                  label="Rol"
+                  label="Grupo"
                   variant="outlined"
                   fullWidth
-                  value={nuevoUsuario.rol}
-                  onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, rol: e.target.value })}
-                >
-                  <MenuItem value="Profesor">Profesor</MenuItem>
-                  <MenuItem value="Administrador">Administrador</MenuItem>
-                  <MenuItem value="Estudiante">Estudiante</MenuItem>
-                </TextField>
+                  value={nuevoEstudiante.grupo}
+                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, grupo: e.target.value })}
+                />
               </Grid>
-              {nuevoUsuario.rol === "Estudiante" && (
-                <>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="Área"
-                      variant="outlined"
-                      fullWidth
-                      value={nuevoUsuario.area}
-                      onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, area: e.target.value })}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="Asignaturas (separar por comas)"
-                      variant="outlined"
-                      fullWidth
-                      value={nuevoUsuario.asignaturas.join(", ")}
-                      onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, asignaturas: e.target.value.split(",").map(item => item.trim()) })}
-                    />
-                  </Grid>
-                </>
-              )}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Área"
+                  variant="outlined"
+                  fullWidth
+                  value={nuevoEstudiante.area}
+                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, area: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Asignaturas (separar por comas)"
+                  variant="outlined"
+                  fullWidth
+                  value={nuevoEstudiante.asignaturas.join(", ")}
+                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, asignaturas: e.target.value.split(",").map(item => item.trim()) })}
+                />
+              </Grid>
             </Grid>
             <Button
               variant="contained"
               color="primary"
               fullWidth
               sx={{ mt: 2 }}
-              onClick={manejarAgregarUsuario}
+              onClick={manejarAgregarEstudiante}
             >
-              {modoEdicion ? "Actualizar Usuario" : "Agregar Usuario"}
+              {modoEdicion ? "Actualizar Estudiante" : "Agregar Estudiante"}
             </Button>
           </Paper>
         </Container>
 
-        {/* Lista de usuarios filtrados */}
+        {/* Lista de estudiantes filtrados */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
-              Usuarios
+              Estudiantes
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Box sx={{ padding: 2 }}>
-                  {usuariosPaginados.length > 0 ? (
-                    usuariosPaginados.map((usuario) => (
-                      <Card key={usuario.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {estudiantesPaginados.length > 0 ? (
+                    estudiantesPaginados.map((estudiante) => (
+                      <Card key={estudiante.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <CardContent sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6">{usuario.nombre} ({usuario.rol})</Typography>
-                          <Typography color="textSecondary">Email: {usuario.email}</Typography>
-                          <Typography color="textSecondary">Fecha de Registro: {usuario.fechaRegistro}</Typography>
-                          {usuario.rol === "Estudiante" && (
-                            <>
-                              <Typography color="textSecondary">Área: {usuario.area}</Typography>
-                              <Typography color="textSecondary">Asignaturas: {usuario.asignaturas.join(", ")}</Typography>
-                            </>
-                          )}
+                          <Typography variant="h6">{estudiante.nombre}</Typography>
+                          <Typography color="textSecondary">Email: {estudiante.email}</Typography>
+                          <Typography color="textSecondary">Grupo: {estudiante.grupo}</Typography>
+                          <Typography color="textSecondary">Área: {estudiante.area}</Typography>
+                          <Typography color="textSecondary">Asignaturas: {estudiante.asignaturas.join(", ")}</Typography>
                         </CardContent>
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <IconButton color="primary" onClick={() => manejarEditarUsuario(usuario)}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <IconButton color="primary" onClick={() => manejarEditarEstudiante(estudiante)}>
                             <EditIcon />
                           </IconButton>
-                          <IconButton color="error" onClick={() => manejarEliminarUsuario(usuario.id)}>
+                          <IconButton color="secondary" onClick={() => manejarEliminarEstudiante(estudiante.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </Box>
                       </Card>
                     ))
                   ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No hay usuarios que mostrar.
-                    </Typography>
+                    <Typography>No se encontraron estudiantes.</Typography>
                   )}
                 </Box>
               </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Pagination
+                  count={totalPaginas}
+                  page={paginaActual}
+                  onChange={(e, page) => setPaginaActual(page)}
+                  color="primary"
+                />
+              </Grid>
             </Grid>
-            {totalPaginas > 1 && (
-              <Pagination
-                count={totalPaginas}
-                page={paginaActual}
-                onChange={(e, value) => setPaginaActual(value)}
-                sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
-              />
-            )}
           </Paper>
         </Container>
 
