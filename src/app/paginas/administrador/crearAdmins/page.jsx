@@ -12,7 +12,11 @@ import {
   TextField,
   Paper,
   Pagination,
-  IconButton
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,102 +24,119 @@ import Navbar from '@/components/Navbars/navbaradmins/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {
-  const [usuarios, setUsuarios] = useState([]);
+  const [administradores, setAdministradores] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
-  const usuariosPorPagina = 5;
-  const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: "", email: "", rol: "Administrador" });
+  const administradoresPorPagina = 5;
+  const [nuevoAdministrador, setNuevoAdministrador] = useState({ nombre: "", email: "", password: "", rolId: "" });
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [usuarioAEditar, setUsuarioAEditar] = useState(null);
+  const [administradorAEditar, setAdministradorAEditar] = useState(null);
 
-  // Obtener los usuarios del backend al cargar el componente
+  // Obtener los administradores del backend
   useEffect(() => {
-    const fetchUsuarios = async () => {
+    const fetchAdministradores = async () => {
       try {
-        const response = await fetch('/api/usuarios');
+        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/administrador');
         const data = await response.json();
-        // Filtrar solo los administradores
-        const administradores = data.filter(usuario => usuario.rol === "Administrador");
-        setUsuarios(administradores);
+        
+        if (Array.isArray(data)) {
+          setAdministradores(data);
+        } else {
+          console.error('La respuesta no es un arreglo:', data);
+          setAdministradores([]);
+        }
       } catch (error) {
-        console.error('Error al obtener los usuarios:', error);
+        console.error('Error al obtener los administradores:', error);
       }
     };
 
-    fetchUsuarios();
+    fetchAdministradores();
   }, []);
 
-  // Filtro por nombre del usuario
-  const usuariosFiltrados = usuarios.filter((usuario) =>
-    usuario.nombre.toLowerCase().includes(busquedaNombre.toLowerCase())
+  // Obtener los roles del backend
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const responseRoles = await fetch("https://control-de-tareas-backend-production.up.railway.app/api/rol/");
+        const dataRoles = await responseRoles.json();
+        setRoles(dataRoles);
+      } catch (error) {
+        console.error("Error al obtener roles:", error);
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  // Filtro por nombre del administrador
+  const administradoresFiltrados = administradores.filter((admin) =>
+    admin.nombre.toLowerCase().includes(busquedaNombre.toLowerCase())
   );
 
-  // Paginación de los usuarios
-  const inicioPagina = (paginaActual - 1) * usuariosPorPagina;
-  const usuariosPaginados = usuariosFiltrados.slice(inicioPagina, inicioPagina + usuariosPorPagina);
-  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+  // Paginación de los administradores
+  const inicioPagina = (paginaActual - 1) * administradoresPorPagina;
+  const administradoresPaginados = administradoresFiltrados.slice(inicioPagina, inicioPagina + administradoresPorPagina);
+  const totalPaginas = Math.ceil(administradoresFiltrados.length / administradoresPorPagina);
 
-  // Agregar o actualizar un usuario en la base de datos
-  const manejarAgregarUsuario = async () => {
+  // Agregar o actualizar un administrador en la base de datos
+  const manejarAgregarAdministrador = async () => {
     try {
       if (modoEdicion) {
-        // Actualizar usuario
-        const response = await fetch(`/api/usuarios/${usuarioAEditar.id}`, {
+        const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/administrador/${administradorAEditar.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(nuevoUsuario),
+          body: JSON.stringify(nuevoAdministrador),
         });
 
         if (response.ok) {
-          const updatedUsuario = await response.json();
-          setUsuarios(usuarios.map(usuario => (usuario.id === updatedUsuario.id ? updatedUsuario : usuario)));
+          const updatedAdministrador = await response.json();
+          setAdministradores(administradores.map(admin => (admin.id === updatedAdministrador.id ? updatedAdministrador : admin)));
           setModoEdicion(false);
-          setUsuarioAEditar(null);
+          setAdministradorAEditar(null);
         }
       } else {
-        // Crear nuevo administrador
-        const response = await fetch('/api/usuarios', {
+        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/administrador', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(nuevoUsuario),
+          body: JSON.stringify(nuevoAdministrador),
         });
 
         if (response.ok) {
-          const nuevoUsuarioResponse = await response.json();
-          setUsuarios([...usuarios, nuevoUsuarioResponse]);
+          const nuevoAdministradorResponse = await response.json();
+          setAdministradores([...administradores, nuevoAdministradorResponse]);
         }
       }
 
-      setNuevoUsuario({ nombre: "", email: "", rol: "Administrador" });
+      setNuevoAdministrador({ nombre: "", email: "", password: "", rolId: "" }); // Resetea rolId
     } catch (error) {
-      console.error('Error al agregar o actualizar el usuario:', error);
+      console.error('Error al agregar o actualizar el administrador:', error);
     }
   };
 
-  // Eliminar un usuario de la base de datos
-  const manejarEliminarUsuario = async (id) => {
+  // Eliminar un administrador de la base de datos
+  const manejarEliminarAdministrador = async (id) => {
     try {
-      const response = await fetch(`/api/usuarios/${id}`, {
+      const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/administrador/${id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setUsuarios(usuarios.filter(usuario => usuario.id !== id));
+        setAdministradores(administradores.filter(admin => admin.id !== id));
       }
     } catch (error) {
-      console.error('Error al eliminar el usuario:', error);
+      console.error('Error al eliminar el administrador:', error);
     }
   };
 
-  // Preparar la edición de un usuario
-  const manejarEditarUsuario = (usuario) => {
+  // Preparar la edición de un administrador
+  const manejarEditarAdministrador = (admin) => {
     setModoEdicion(true);
-    setUsuarioAEditar(usuario);
-    setNuevoUsuario({ nombre: usuario.nombre, email: usuario.email, rol: "Administrador" });
+    setAdministradorAEditar(admin);
+    setNuevoAdministrador({ nombre: admin.nombre, email: admin.email, password: "", rolId: admin.rolId });
   };
 
   return (
@@ -163,8 +184,8 @@ const Page = () => {
                   label="Nombre"
                   variant="outlined"
                   fullWidth
-                  value={nuevoUsuario.nombre}
-                  onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, nombre: e.target.value })}
+                  value={nuevoAdministrador.nombre}
+                  onChange={(e) => setNuevoAdministrador({ ...nuevoAdministrador, nombre: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -172,9 +193,37 @@ const Page = () => {
                   label="Email"
                   variant="outlined"
                   fullWidth
-                  value={nuevoUsuario.email}
-                  onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, email: e.target.value })}
+                  value={nuevoAdministrador.email}
+                  onChange={(e) => setNuevoAdministrador({ ...nuevoAdministrador, email: e.target.value })}
                 />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Contraseña"
+                  variant="outlined"
+                  type="password"
+                  fullWidth
+                  value={nuevoAdministrador.password}
+                  onChange={(e) => setNuevoAdministrador({ ...nuevoAdministrador, password: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Rol</InputLabel>
+                  <Select
+                    label="Rol"
+                    value={nuevoAdministrador.rolId}
+                    onChange={(e) =>
+                      setNuevoAdministrador({ ...nuevoAdministrador, rolId: e.target.value })
+                    }
+                  >
+                    {roles.map((rol) => (
+                      <MenuItem key={rol._id} value={rol._id}>
+                        {rol.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
             </Grid>
             <Button
@@ -182,7 +231,7 @@ const Page = () => {
               color="primary"
               fullWidth
               sx={{ mt: 2 }}
-              onClick={manejarAgregarUsuario}
+              onClick={manejarAgregarAdministrador}
             >
               {modoEdicion ? "Actualizar Administrador" : "Agregar Administrador"}
             </Button>
@@ -198,40 +247,36 @@ const Page = () => {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Box sx={{ padding: 2 }}>
-                  {usuariosPaginados.length > 0 ? (
-                    usuariosPaginados.map((usuario) => (
-                      <Card key={usuario.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <CardContent sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6">{usuario.nombre} ({usuario.rol})</Typography>
-                          <Typography color="textSecondary">Email: {usuario.email}</Typography>
-                          <Typography color="textSecondary">Fecha de Registro: {usuario.fechaRegistro}</Typography>
+                  {administradoresPaginados.length > 0 ? (
+                    administradoresPaginados.map((admin) => (
+                      <Card key={admin._id} sx={{ mb: 2 }}>
+                        <CardContent>
+                          <Typography variant="h6">{admin.nombre}</Typography>
+                          <Typography variant="body2">{admin.email}</Typography>
+                          <Box display="flex" justifyContent="flex-end" mt={2}>
+                            <IconButton onClick={() => manejarEditarAdministrador(admin)}>
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={() => manejarEliminarAdministrador(admin._id)}>
+                              <DeleteIcon />
+                            </IconButton>
+                          </Box>
                         </CardContent>
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <IconButton color="primary" onClick={() => manejarEditarUsuario(usuario)}>
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton color="error" onClick={() => manejarEliminarUsuario(usuario.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
                       </Card>
                     ))
                   ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No hay administradores que mostrar.
-                    </Typography>
+                    <Typography>No hay administradores que coincidan con la búsqueda.</Typography>
                   )}
                 </Box>
               </Grid>
             </Grid>
-            {totalPaginas > 1 && (
-              <Pagination
-                count={totalPaginas}
-                page={paginaActual}
-                onChange={(e, value) => setPaginaActual(value)}
-                sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
-              />
-            )}
+            {/* Paginación */}
+            <Pagination
+              count={totalPaginas}
+              page={paginaActual}
+              onChange={(event, value) => setPaginaActual(value)}
+              sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+            />
           </Paper>
         </Container>
 

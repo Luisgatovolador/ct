@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Grid,
@@ -11,126 +11,292 @@ import {
   Box,
   TextField,
   Paper,
-  MenuItem,
   Pagination,
-  IconButton
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import Navbar from '@/components/Navbars/navbaradmins/navbar';
-import Footer from '@/components/footer/footer';
+  IconButton,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  Checkbox,
+  ListItemText,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import Navbar from "@/components/Navbars/navbaradmins/navbar";
+import Footer from "@/components/footer/footer";
 
 const Page = () => {
-  const [estudiantes, setEstudiantes] = useState([]);
+  const [alumnos, setAlumnos] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
-  const [busquedaGrupo, setBusquedaGrupo] = useState("");
   const [busquedaArea, setBusquedaArea] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
-  const estudiantesPorPagina = 5;
-  const [nuevoEstudiante, setNuevoEstudiante] = useState({ nombre: "", email: "", grupo: "", area: "", asignaturas: [] });
+  const [roles, setRoles] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const alumnosPorPagina = 4;
+  const [nuevoAlumno, setNuevoAlumno] = useState({
+    nombre: "",
+    email: "",
+    rol: "",
+    password: "",
+    area: "",
+  });
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [estudianteAEditar, setEstudianteAEditar] = useState(null);
+  const [alumnoAEditar, setAlumnoAEditar] = useState(null);
 
-  // Obtener los estudiantes del backend al cargar el componente
   useEffect(() => {
-    const fetchEstudiantes = async () => {
+    const fetchRoles = async () => {
       try {
-        const response = await fetch('/api/estudiantes');
-        const data = await response.json();
-        setEstudiantes(data);
+        const responseRoles = await fetch(
+          "https://control-de-tareas-backend-production.up.railway.app/api/rol/"
+        );
+        const dataRoles = await responseRoles.json();
+        setRoles(dataRoles);
       } catch (error) {
-        console.error('Error al obtener los estudiantes:', error);
+        console.error("Error al obtener roles:", error);
       }
     };
-
-    fetchEstudiantes();
+    fetchRoles();
   }, []);
 
-  // Filtro por nombre, grupo y área del estudiante
-  const estudiantesFiltrados = estudiantes.filter((estudiante) =>
-    estudiante.nombre.toLowerCase().includes(busquedaNombre.toLowerCase()) &&
-    estudiante.grupo.toLowerCase().includes(busquedaGrupo.toLowerCase()) &&
-    estudiante.area.toLowerCase().includes(busquedaArea.toLowerCase())
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const responseAreas = await fetch(
+          "https://control-de-tareas-backend-production.up.railway.app/api/area/"
+        );
+        const dataAreas = await responseAreas.json();
+        setAreas(dataAreas);
+      } catch (error) {
+        console.error("Error al obtener areas:", error);
+      }
+    };
+    fetchAreas();
+  }, []);
+
+  // Obtener los alumnos del backend al cargar el componente
+  useEffect(() => {
+    const fetchAlumnos = async () => {
+      try {
+        const response = await fetch(
+          "https://control-de-tareas-backend-production.up.railway.app/api/alumno/"
+        );
+        const data = await response.json();
+        setAlumnos(data);
+      } catch (error) {
+        console.error("Error al obtener los alumnos:", error);
+      }
+    };
+    fetchAlumnos();
+  }, []);
+
+  // Filtro por nombre y área del alumno
+  const alumnosFiltrados = alumnos.filter(
+    (alumno) =>
+      alumno.nombre.toLowerCase().includes(busquedaNombre.toLowerCase()) &&
+      (areas.find((area) => area._id === alumno.area)?.nombre || "")
+        .toLowerCase()
+        .includes(busquedaArea.toLowerCase())
   );
 
-  // Paginación de los estudiantes
-  const inicioPagina = (paginaActual - 1) * estudiantesPorPagina;
-  const estudiantesPaginados = estudiantesFiltrados.slice(inicioPagina, inicioPagina + estudiantesPorPagina);
-  const totalPaginas = Math.ceil(estudiantesFiltrados.length / estudiantesPorPagina);
+  // Paginación de los alumnos
+  const inicioPagina = (paginaActual - 1) * alumnosPorPagina;
+  const alumnosPaginados = alumnosFiltrados.slice(
+    inicioPagina,
+    inicioPagina + alumnosPorPagina
+  );
+  const totalPaginas = Math.ceil(alumnosFiltrados.length / alumnosPorPagina);
 
-  // Agregar o actualizar un estudiante en la base de datos
-  const manejarAgregarEstudiante = async () => {
+  // Agregar o actualizar un alumno en la base de datos
+  const manejarAgregarAlumno = async () => {
     try {
       if (modoEdicion) {
-        // Actualizar estudiante
-        const response = await fetch(`/api/estudiantes/${estudianteAEditar.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(nuevoEstudiante),
-        });
+        // Actualizar alumno
+        const response = await fetch(
+          `https://control-de-tareas-backend-production.up.railway.app/api/alumno/${alumnoAEditar._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(nuevoAlumno),
+          }
+        );
 
         if (response.ok) {
-          const updatedEstudiante = await response.json();
-          setEstudiantes(estudiantes.map(est => (est.id === updatedEstudiante.id ? updatedEstudiante : est)));
+          const updatedAlumno = await response.json();
+          setAlumnos(
+            alumnos.map((al) =>
+              al._id === updatedAlumno._id ? updatedAlumno : al
+            )
+          );
           setModoEdicion(false);
-          setEstudianteAEditar(null);
+          setAlumnoAEditar(null);
         }
       } else {
-        // Crear nuevo estudiante
-        const response = await fetch('/api/estudiantes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(nuevoEstudiante),
-        });
+        // Crear nuevo alumno
+        const response = await fetch(
+          "https://control-de-tareas-backend-production.up.railway.app/api/alumno/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(nuevoAlumno),
+          }
+        );
 
         if (response.ok) {
-          const nuevoEstudianteResponse = await response.json();
-          setEstudiantes([...estudiantes, nuevoEstudianteResponse]);
+          const nuevoAlumnoResponse = await response.json();
+          setAlumnos([...alumnos, nuevoAlumnoResponse]);
         }
       }
 
-      setNuevoEstudiante({ nombre: "", email: "", grupo: "", area: "", asignaturas: [] });
+      setNuevoAlumno({
+        nombre: "",
+        email: "",
+        rol: "",
+        password: "",
+        area: "",
+      });
     } catch (error) {
-      console.error('Error al agregar o actualizar el estudiante:', error);
+      console.error("Error al agregar o actualizar el alumno:", error);
     }
   };
 
-  // Eliminar un estudiante de la base de datos
-  const manejarEliminarEstudiante = async (id) => {
+  // Eliminar un alumno de la base de datos
+  const manejarEliminarAlumno = async (id) => {
     try {
-      const response = await fetch(`/api/estudiantes/${id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `https://control-de-tareas-backend-production.up.railway.app/api/alumno/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
-        setEstudiantes(estudiantes.filter(est => est.id !== id));
+        setAlumnos(alumnos.filter((al) => al._id !== id));
       }
     } catch (error) {
-      console.error('Error al eliminar el estudiante:', error);
+      console.error("Error al eliminar el alumno:", error);
     }
   };
 
-  // Preparar la edición de un estudiante
-  const manejarEditarEstudiante = (estudiante) => {
+  // Preparar la edición de un alumno
+  const manejarEditarAlumno = (alumno) => {
     setModoEdicion(true);
-    setEstudianteAEditar(estudiante);
-    setNuevoEstudiante({ nombre: estudiante.nombre, email: estudiante.email, grupo: estudiante.grupo, area: estudiante.area, asignaturas: estudiante.asignaturas || [] });
+    setAlumnoAEditar(alumno);
+    setNuevoAlumno({
+      nombre: alumno.nombre,
+      email: alumno.email,
+      rol: alumno.rol,
+      password: "",
+      area: alumno.area,
+    });
   };
 
   return (
     <>
       <Navbar />
 
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      >
+        
+
+        {/* Panel para agregar y editar alumnos */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            {/* Filtro por nombre, grupo y área */}
+            <Typography variant="h5" component="h3" gutterBottom>
+              {modoEdicion ? "Editar Alumno" : "Agregar Nuevo Alumno"}
+            </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Nombre"
+                  variant="outlined"
+                  fullWidth
+                  value={nuevoAlumno.nombre}
+                  onChange={(e) =>
+                    setNuevoAlumno({ ...nuevoAlumno, nombre: e.target.value })
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Email"
+                  variant="outlined"
+                  fullWidth
+                  value={nuevoAlumno.email}
+                  onChange={(e) =>
+                    setNuevoAlumno({ ...nuevoAlumno, email: e.target.value })
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Rol</InputLabel>
+                  <Select
+                    label="Rol"
+                    value={nuevoAlumno.rol}
+                    onChange={(e) =>
+                      setNuevoAlumno({ ...nuevoAlumno, rol: e.target.value })
+                    }
+                  >
+                    {roles.map((rol) => (
+                      <MenuItem key={rol._id} value={rol._id}>
+                        {rol.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Area</InputLabel>
+                  <Select
+                    label="Area"
+                    value={nuevoAlumno.area}
+                    onChange={(e) =>
+                      setNuevoAlumno({ ...nuevoAlumno, area: e.target.value })
+                    }
+                  >
+                    {areas.map((area) => (
+                      <MenuItem key={area._id} value={area._id}>
+                        {area.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Contraseña"
+                  variant="outlined"
+                  fullWidth
+                  type="password"
+                  value={nuevoAlumno.password}
+                  onChange={(e) =>
+                    setNuevoAlumno({ ...nuevoAlumno, password: e.target.value })
+                  }
+                />
+              </Grid>
+            </Grid>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ mt: 2 }}
+              onClick={manejarAgregarAlumno}
+            >
+              {modoEdicion ? "Actualizar Alumno" : "Agregar Alumno"}
+            </Button>
+          </Paper>
+        </Container>
+        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+          <Paper elevation={3} sx={{ padding: 2 }}>
+            {/* Filtro por nombre y área */}
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   label="Buscar por nombre"
                   variant="outlined"
@@ -140,140 +306,85 @@ const Page = () => {
                 />
               </Grid>
               <Grid item xs={12} md={4}>
-                <TextField
-                  label="Buscar por grupo"
-                  variant="outlined"
-                  fullWidth
-                  value={busquedaGrupo}
-                  onChange={(e) => setBusquedaGrupo(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  label="Buscar por área"
-                  variant="outlined"
-                  fullWidth
-                  value={busquedaArea}
-                  onChange={(e) => setBusquedaArea(e.target.value)}
-                />
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Buscar por área</InputLabel>
+                  <Select
+                    label="Buscar por área"
+                    value={busquedaArea}
+                    onChange={(e) => setBusquedaArea(e.target.value)}
+                  >
+                    <MenuItem value="">
+                      <em>Todos</em>
+                    </MenuItem>
+                    {areas.map((area) => (
+                      <MenuItem key={area.nombre} value={area.nombre}>
+                        {area.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
             </Grid>
           </Paper>
         </Container>
 
-        {/* Panel para agregar y editar estudiantes */}
+        {/* Lista de alumnos filtrados */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h5" component="h3" gutterBottom>
-              {modoEdicion ? "Editar Estudiante" : "Agregar Nuevo Estudiante"}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Nombre"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoEstudiante.nombre}
-                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, nombre: e.target.value })}
-                />
+          <Grid container spacing={2}>
+            {alumnosPaginados.map((alumno) => (
+              <Grid item xs={12} md={6} key={alumno._id}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" component="h2">
+                      {alumno.nombre}
+                    </Typography>
+                    <Typography color="textSecondary">
+                      Email: {alumno.email}
+                    </Typography>
+                    <Typography color="textSecondary">
+                      Rol:{" "}
+                      {roles.find((rol) => rol._id === alumno.rol)?.nombre ||
+                        "Desconocido"}
+                    </Typography>
+                    <Typography color="textSecondary">
+                      Área:{" "}
+                      {areas.find((area) => area._id === alumno.area)?.nombre ||
+                        "Desconocido"}
+                    </Typography>
+                  </CardContent>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      padding: 1,
+                    }}
+                  >
+                    <IconButton onClick={() => manejarEditarAlumno(alumno)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => manejarEliminarAlumno(alumno._id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </Card>
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Email"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoEstudiante.email}
-                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, email: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Grupo"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoEstudiante.grupo}
-                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, grupo: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Área"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoEstudiante.area}
-                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, area: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Asignaturas (separar por comas)"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoEstudiante.asignaturas.join(", ")}
-                  onChange={(e) => setNuevoEstudiante({ ...nuevoEstudiante, asignaturas: e.target.value.split(",").map(item => item.trim()) })}
-                />
-              </Grid>
-            </Grid>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ mt: 2 }}
-              onClick={manejarAgregarEstudiante}
-            >
-              {modoEdicion ? "Actualizar Estudiante" : "Agregar Estudiante"}
-            </Button>
-          </Paper>
-        </Container>
+            ))}
+          </Grid>
 
-        {/* Lista de estudiantes filtrados */}
-        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h5" component="h3" gutterBottom>
-              Estudiantes
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box sx={{ padding: 2 }}>
-                  {estudiantesPaginados.length > 0 ? (
-                    estudiantesPaginados.map((estudiante) => (
-                      <Card key={estudiante.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <CardContent sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6">{estudiante.nombre}</Typography>
-                          <Typography color="textSecondary">Email: {estudiante.email}</Typography>
-                          <Typography color="textSecondary">Grupo: {estudiante.grupo}</Typography>
-                          <Typography color="textSecondary">Área: {estudiante.area}</Typography>
-                          <Typography color="textSecondary">Asignaturas: {estudiante.asignaturas.join(", ")}</Typography>
-                        </CardContent>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <IconButton color="primary" onClick={() => manejarEditarEstudiante(estudiante)}>
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton color="secondary" onClick={() => manejarEliminarEstudiante(estudiante.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
-                      </Card>
-                    ))
-                  ) : (
-                    <Typography>No se encontraron estudiantes.</Typography>
-                  )}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Pagination
-                  count={totalPaginas}
-                  page={paginaActual}
-                  onChange={(e, page) => setPaginaActual(page)}
-                  color="primary"
-                />
-              </Grid>
-            </Grid>
-          </Paper>
+          {/* Paginación */}
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <Pagination
+              count={totalPaginas}
+              page={paginaActual}
+              onChange={(e, page) => setPaginaActual(page)}
+            />
+          </Box>
         </Container>
-
-        <Footer />
       </Box>
+
+      <Footer />
     </>
   );
 };
