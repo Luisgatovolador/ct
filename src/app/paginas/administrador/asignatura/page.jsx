@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import {Container,Grid,Card,CardContent,Typography,Button,TextField,
-  Paper,MenuItem,IconButton,Box,Pagination,} from '@mui/material';
+  Paper,MenuItem,IconButton,Box,Pagination,FormControl,InputLabel,Select} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Navbar from '@/components/Navbars/navbaradmins/navbar';
@@ -13,10 +13,26 @@ const Page = () => {
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [filtroArea, setFiltroArea] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
-  const asignaturasPorPagina = 5;
+  const asignaturasPorPagina = 4;
+  const [areas, setAreas] = useState([]);
   const [nuevoAsignatura, setNuevoAsignatura] = useState({ nombre: "", catedratico: [], estudiantes: [], area: "" });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [asignaturaAEditar, setAsignaturaAEditar] = useState(null);
+  
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const responseAreas = await fetch(
+          "https://control-de-tareas-backend-production.up.railway.app/api/area/"
+        );
+        const dataAreas = await responseAreas.json();
+        setAreas(dataAreas);
+      } catch (error) {
+        console.error("Error al obtener areas:", error);
+      }
+    };
+    fetchAreas();
+  }, []);
 
   // Obtener las asignaturas del backend al cargar el componente
   useEffect(() => {
@@ -183,14 +199,24 @@ const Page = () => {
                   onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, nombre: e.target.value })}
                 />
               </Grid>
+
               <Grid item xs={12} md={6}>
-                <TextField
-                  label="Área"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoAsignatura.area}
-                  onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, area: e.target.value })}
-                />
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Area</InputLabel>
+                  <Select
+                    label="Area"
+                    value={nuevoAsignatura.area}
+                    onChange={(e) =>
+                      setNuevoAlumno({ ...nuevoAsignatura, area: e.target.value })
+                    }
+                  >
+                    {areas.map((area) => (
+                      <MenuItem key={area._id} value={area._id}>
+                        {area.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
 
              

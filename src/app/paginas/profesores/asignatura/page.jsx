@@ -14,6 +14,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "@/components/Navbars/navbarprofesores/navbar";
 import Footer from "@/components/footer/footer";
+import { useRouter } from "next/navigation"; // Importa useRouter
 
 const activities = [
   {
@@ -37,6 +38,13 @@ const carreraInfo = {
 };
 
 function Page() {
+  const router = useRouter(); // Hook para manejar la navegación
+
+  const handleRedirect = () => {
+    // Esta es la función que manejará la redirección
+    router.push("/paginas/profesores/asignatura/[id]"); // Reemplaza [id] con la ruta específica
+  };
+
   return (
     <>
       <Navbar />
@@ -75,7 +83,7 @@ function Page() {
                             marginTop: 1,
                           }}
                         >
-                          <Button size="small" sx={{ marginTop: 1 }}>
+                          <Button size="small" sx={{ marginTop: 1 }} onClick={handleRedirect}>
                             Ver Más
                           </Button>
                         </Box>

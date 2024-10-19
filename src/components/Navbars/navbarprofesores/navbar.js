@@ -17,6 +17,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 
 const pages = [
   { name: 'Asignaturas', route: '/paginas/profesores/asignatura' },
+  { name: 'Mis Asignatura', route: '/paginas/profesores/MisAsignatura' },
   { name: 'Calendario', route: '/paginas/profesores/Calendario' } 
 ];
 
