@@ -6,10 +6,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const images = [
-  "https://via.placeholder.com/800x300?text=Image+1",
-  "https://via.placeholder.com/800x300?text=Image+2",
-  "https://via.placeholder.com/800x300?text=Image+3",
-  "https://via.placeholder.com/800x300?text=Image+4",
+  "/imagen1.jpg",
+  "/imagen2.jpg",
+  "/imagen3.jpg",
 ];
 
 export default function Carusel() {
