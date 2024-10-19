@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Container, Grid, Card, CardContent, Typography, Button, List, ListItem, ListItemText, Box } from '@mui/material';
-import Navbar from '@/components/Navbars/navbarUsuarios/navbar';
+import Navbar from '@/components/Navbars/navbar';
 import Footer from '@/components/footer/footer';
 import Paper from "@mui/material/Paper";
 

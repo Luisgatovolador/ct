@@ -6,7 +6,7 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { es } from "date-fns/locale";
 import { Container, Typography } from "@mui/material";
-import Navbar from "@/components/Navbars/navbaradmins/navbar";
+import Navbar from '@/components/Navbars/navbar';
 import Footer from "@/components/footer/footer";
 
 // Configuración de locales para el calendario en español

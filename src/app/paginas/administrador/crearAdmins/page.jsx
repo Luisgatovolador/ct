@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import Navbar from '@/components/Navbars/navbaradmins/navbar';
+import Navbar from '@/components/Navbars/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {
