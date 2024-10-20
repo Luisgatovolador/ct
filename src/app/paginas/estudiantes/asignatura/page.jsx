@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -12,93 +12,92 @@ import {
   Button,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Navbar from '@/components/Navbars/navbar';
+import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
+import { getUser } from "@/services/auth";
 
-const activities = [
-  {
-    title: "Actividad 1",
-    description: "Descripción de la actividad 1.",
-  },
-  {
-    title: "Actividad 2",
-    description: "Descripción de la actividad 2.",
-  },
-  {
-    title: "Actividad 3",
-    description: "Descripción de la actividad 3.",
-  },
-];
-
-const carreraInfo = {
-  name: "Ingeniería en Desarrollo y Gestión de Software",
-  description: "La carrera se enfoca en la creación y gestión de software.",
-  semester: "Séptimo Semestre",
-};
+const API_URL = "https://control-de-tareas-backend-production.up.railway.app/api";
 
 function Page() {
+  const [user, setUser] = useState(null);
+  const [dataUser, setDataUser] = useState({});
+  const [asignaturas, setAsignaturas] = useState([]);
+  const [areas, setAreas] = useState([]);
+
+  useEffect(() => {
+    const fetchedUser = getUser();
+    if (fetchedUser) {
+      setUser(fetchedUser);
+      fetchData(fetchedUser.id);
+    }
+  }, []);
+
+  const fetchData = async (userId) => {
+    try {
+      const alumno = await fetch(`${API_URL}/alumno/${userId}`);
+      const alumnoData = await alumno.json();
+
+      const asignaturas = await fetch(`${API_URL}/asignatura`);
+      const asignaturasData = await asignaturas.json();
+
+      const areas = await fetch(`${API_URL}/area`);
+      const areasData = await areas.json();
+
+      setAreas(areasData);
+      setAsignaturas(asignaturasData);
+      setDataUser(alumnoData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  if (!user) {
+    return <p>Loading...</p>;
+  }
+
+  // Filtrar las asignaturas que el alumno está cursando
+  const asignaturasAlumno = asignaturas.filter((asignatura) =>
+    dataUser.asignatura?.includes(asignatura._id)
+  );
+
   return (
     <>
       <Navbar />
       <br />
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <div className="px-44" style={{ flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h6" component="h3">
-              {carreraInfo.name}
+              {areas.find((area) => area._id === dataUser.area)?.nombre}
             </Typography>
           </Paper>
           <br />
 
+          {/* Mostrar las asignaturas del alumno */}
           <Paper elevation={3} sx={{ padding: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={8}>
-                <Box sx={{ padding: 2 }}>
-                  <Typography variant="h4" component="h2" gutterBottom>
-                    Tareas Pendientes
-                  </Typography>
-                  {activities.map((activity, index) => (
-                    <Accordion key={index}>
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls={`panel${index}-content`}
-                        id={`panel${index}-header`}
-                      >
-                        <Typography>{activity.title}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography>{activity.description}</Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            marginTop: 1,
-                          }}
-                        >
-                          <Button size="small" sx={{ marginTop: 1 }}>
-                            Ver Más
-                          </Button>
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} md={4}>
-                <br />
-                <br />
-                <br />
-                <Paper elevation={4} sx={{ padding: 2 }}>
-                  <Typography variant="h5" component="h2" gutterBottom>
-                    Tareas Completadas
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Tarea 1
-                  </Typography>
-                </Paper>
-              </Grid>
-            </Grid>
+            <Typography variant="h4" component="h2" gutterBottom>
+              Asignaturas
+            </Typography>
+            {asignaturasAlumno.length > 0 ? (
+              asignaturasAlumno.map((asignatura) => (
+                <Accordion key={asignatura._id}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls={`panel-${asignatura._id}-content`}
+                    id={`panel-${asignatura._id}-header`}
+                  >
+                    <Typography>{asignatura.nombre}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography>{asignatura.descripcion}</Typography>
+                  </AccordionDetails>
+                </Accordion>
+              ))
+            ) : (
+              <Typography variant="body2">
+                No tienes asignaturas registradas.
+              </Typography>
+            )}
           </Paper>
         </div>
         <Footer />
