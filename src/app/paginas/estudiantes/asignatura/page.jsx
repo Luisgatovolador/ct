@@ -54,8 +54,6 @@ function Page() {
   if (!user) {
     return <p>Loading...</p>;
   }
-
-  // Filtrar las asignaturas que el alumno está cursando
   const asignaturasAlumno = asignaturas.filter((asignatura) =>
     dataUser.asignatura?.includes(asignatura._id)
   );
@@ -73,7 +71,6 @@ function Page() {
           </Paper>
           <br />
 
-          {/* Mostrar las asignaturas del alumno */}
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h4" component="h2" gutterBottom>
               Asignaturas
