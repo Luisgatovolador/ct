@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/components/Navbars/navbarUsuarios/navbar";
+import Navbar from "@/components/Navbars/navbarprofesores/navbar";
 import ImageCarousel from "@/components/carusel/Carusel";
 import * as React from "react";
 import Card from "@mui/material/Card";
