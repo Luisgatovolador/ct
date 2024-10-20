@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import {Container,Grid,Card,CardContent,Typography,Button,TextField,
-  Paper,MenuItem,IconButton,Box,Pagination,FormControl,InputLabel,Select} from '@mui/material';
+import {
+  Container, Grid, Card, CardContent, Typography, Button, TextField,
+  Paper, MenuItem, IconButton, Box, Pagination, FormControl, InputLabel, Select
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Footer from '@/components/footer/footer';
@@ -18,7 +20,7 @@ const Page = () => {
   const [nuevoAsignatura, setNuevoAsignatura] = useState({ nombre: "", catedratico: [], estudiantes: [], area: "" });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [asignaturaAEditar, setAsignaturaAEditar] = useState(null);
-  
+
   useEffect(() => {
     const fetchAreas = async () => {
       try {
@@ -28,7 +30,7 @@ const Page = () => {
         const dataAreas = await responseAreas.json();
         setAreas(dataAreas);
       } catch (error) {
-        console.error("Error al obtener areas:", error);
+        console.error("Error al obtener áreas:", error);
       }
     };
     fetchAreas();
@@ -41,12 +43,10 @@ const Page = () => {
         const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura/');
         const data = await response.json();
         setAsignaturas(data);
-
       } catch (error) {
         console.error('Error al obtener las asignaturas:', error);
       }
     };
-
     fetchAsignaturas();
   }, []);
 
@@ -64,7 +64,6 @@ const Page = () => {
   const manejarAgregarAsignatura = async () => {
     try {
       if (modoEdicion) {
-       
         const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/asignatura/${asignaturaAEditar._id}`, {
           method: 'PUT',
           headers: {
@@ -78,9 +77,8 @@ const Page = () => {
           setAsignaturas(asignaturas.map(asignatura => asignatura.id === updatedAsignatura.id ? updatedAsignatura : asignatura));
           setModoEdicion(false);
           setAsignaturaAEditar(null);
-          window.location.reload()
+          window.location.reload();
         }
-       
       } else {
         // Crear nueva asignatura
         const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura', {
@@ -94,7 +92,7 @@ const Page = () => {
         if (response.ok) {
           const nuevaAsignatura = await response.json();
           setAsignaturas([...asignaturas, nuevaAsignatura]);
-          window.location.reload()
+          window.location.reload();
         }
       }
 
@@ -113,9 +111,8 @@ const Page = () => {
 
       if (response.ok) {
         setAsignaturas(asignaturas.filter(asignatura => asignatura.id !== id));
-        window.location.reload()
+        window.location.reload();
       }
-     
     } catch (error) {
       console.error('Error al eliminar la asignatura:', error);
     }
@@ -131,179 +128,148 @@ const Page = () => {
   return (
     <>
       <Navbar />
-  
+
       <div className='px-44'>
         <br />
-      <Typography variant="h4" component="h2" gutterBottom style={""}>
-            Administracion de Asignaturas
-      </Typography>
+        <Typography variant="h4" component="h2" gutterBottom>
+          Administración de Asignaturas
+        </Typography>
 
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        
+        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+            <br />
 
-        <div className="grid grid-cols-2 gap-10"> 
-        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Buscar asignatura por nombre"
-                  variant="outlined"
-                  fullWidth
-                  value={busquedaNombre}
-                  onChange={(e) => setBusquedaNombre(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  select
-                  label="Filtrar por área"
-                  variant="outlined"
-                  fullWidth
-                  value={filtroArea}
-                  onChange={(e) => setFiltroArea(e.target.value)}
-                >
-                  <MenuItem value="">Todas</MenuItem>
-                  <MenuItem value="Ciencias">Ciencias</MenuItem>
-                  <MenuItem value="Humanidades">Humanidades</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  sx={{ height: '100%' }}
-                  onClick={() => setBusquedaNombre("")} 
-                >
-                  Buscar
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
-        
-        <br />
+            <Paper elevation={3} sx={{ padding: 2 }}>
+              <Typography variant="h5" component="h3" gutterBottom>
+                {modoEdicion ? "Editar Asignatura" : "Agregar Nueva Asignatura"}
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Nombre"
+                    variant="outlined"
+                    fullWidth
+                    value={nuevoAsignatura.nombre}
+                    onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, nombre: e.target.value })}
+                  />
+                </Grid>
 
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h5" component="h3" gutterBottom>
-              {modoEdicion ? "Editar Asignatura" : "Agregar Nueva Asignatura"}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Nombre"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoAsignatura.nombre}
-                  onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, nombre: e.target.value })}
-                />
+                <Grid item xs={12} md={6}>
+                  <FormControl variant="outlined" fullWidth>
+                    <InputLabel>Área</InputLabel>
+                    <Select
+                      label="Área"
+                      value={nuevoAsignatura.area}
+                      onChange={(e) =>
+                        setNuevoAsignatura({ ...nuevoAsignatura, area: e.target.value })
+                      }
+                    >
+                      {areas.map((area) => (
+                        <MenuItem key={area._id} value={area._id}>
+                          {area.nombre}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mt: 2 }}
+                onClick={manejarAgregarAsignatura}
+              >
+                {modoEdicion ? "Actualizar Asignatura" : "Agregar Asignatura"}
+              </Button>
+            </Paper>
+          </Container>
 
-              <Grid item xs={12} md={6}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel>Area</InputLabel>
-                  <Select
-                    label="Area"
-                    value={nuevoAsignatura.area}
-                    onChange={(e) =>
-                      setNuevoAlumno({ ...nuevoAsignatura, area: e.target.value })
-                    }
+          <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+            <Paper elevation={3} sx={{ padding: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Buscar asignatura por nombre"
+                    variant="outlined"
+                    fullWidth
+                    value={busquedaNombre}
+                    onChange={(e) => setBusquedaNombre(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    select
+                    label="Filtrar por área"
+                    variant="outlined"
+                    fullWidth
+                    value={filtroArea}
+                    onChange={(e) => setFiltroArea(e.target.value)}
                   >
-                    {areas.map((area) => (
-                      <MenuItem key={area._id} value={area._id}>
-                        {area.nombre}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    <MenuItem value="">Todas</MenuItem>
+                    <MenuItem value="Ciencias">Ciencias</MenuItem>
+                    <MenuItem value="Humanidades">Humanidades</MenuItem>
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} md={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ height: '100%' }}
+                    onClick={() => setBusquedaNombre("")}
+                  >
+                    Buscar
+                  </Button>
+                </Grid>
               </Grid>
+            </Paper>
+          </Container>
 
-             
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Catedrático (separar por comas)"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoAsignatura.catedratico}
-                  onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, catedratico: e.target.value.split(",").map(item => item.trim()) })}
+          <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+            <Paper elevation={3} sx={{ padding: 2 }}>
+              <Typography variant="h5" component="h3" gutterBottom>
+                Asignaturas
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Box sx={{ padding: 2 }}>
+                    {asignaturasPaginadas.length > 0 ? (
+                      asignaturasPaginadas.map((asignatura) => (
+                        <Card key={asignatura.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <CardContent sx={{ flexGrow: 1 }}>
+                            <Typography variant="h6">{asignatura.nombre}</Typography>
+                            <Typography color="textSecondary">Área: {asignatura.area}</Typography>
+                          </CardContent>
+                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                            <IconButton color="primary" onClick={() => manejarEditarAsignatura(asignatura)}>
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton color="error" onClick={() => manejarEliminarAsignatura(asignatura._id)}>
+                              <DeleteIcon />
+                            </IconButton>
+                          </Box>
+                        </Card>
+                      ))
+                    ) : (
+                      <Typography variant="body2" color="textSecondary">
+                        No hay asignaturas que mostrar.
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+              {totalPaginas > 1 && (
+                <Pagination
+                  count={totalPaginas}
+                  page={paginaActual}
+                  onChange={(e, value) => setPaginaActual(value)}
+                  sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
                 />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Estudiantes (separar por comas)"
-                  variant="outlined"
-                  fullWidth
-                  value={nuevoAsignatura.estudiantes}
-                  onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, estudiantes: e.target.value.split(",").map(item => item.trim()) })}
-                />
-              </Grid>
-            </Grid>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ mt: 2 }}
-              onClick={manejarAgregarAsignatura}
-            >
-              {modoEdicion ? "Actualizar Asignatura" : "Agregar Asignatura"}
-            </Button>
-          </Paper>
-        </Container>
-
-        
-        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h5" component="h3" gutterBottom>
-              Asignaturas
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box sx={{ padding: 2 }}>
-                  {asignaturasPaginadas.length > 0 ? (
-                    asignaturasPaginadas.map((asignatura) => (
-                      <Card key={asignatura.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <CardContent sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6">{asignatura.nombre}</Typography>
-                          <Typography color="textSecondary">Área: {asignatura._id}</Typography>
-                          <Typography color="textSecondary">Área: {asignatura.area}</Typography>
-                          <Typography color="textSecondary">Catedrático: {asignatura.catedratico}</Typography>
-                          <Typography color="textSecondary">Estudiantes: {asignatura.estudiantes}</Typography>
-                        </CardContent>
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <IconButton color="primary" onClick={() => manejarEditarAsignatura(asignatura)}>
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton color="error" onClick={() => manejarEliminarAsignatura(asignatura._id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
-                      </Card>
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No hay asignaturas que mostrar.
-                    </Typography>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-            {totalPaginas > 1 && (
-              <Pagination
-                count={totalPaginas}
-                page={paginaActual}
-                onChange={(e, value) => setPaginaActual(value)}
-                sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
-              />
-            )}
-          </Paper>
-        </Container>
-        </div>
-
-        
-        
-      </Box>
-
+              )}
+            </Paper>
+          </Container>
+        </Box>
       </div>
       <Footer />
     </>

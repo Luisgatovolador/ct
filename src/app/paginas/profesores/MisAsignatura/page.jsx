@@ -11,14 +11,14 @@ import CardActions from "@mui/material/CardActions";
 import Footer from "@/components/footer/footer";
 import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
-import Link from "next/link"; // Importa Link
+import Link from "next/link"; 
 
 export default function Home() {
   const [asignaturas, setAsignaturas] = React.useState([]);
   const [profesores, setProfesores] = React.useState([]);
 
   useEffect(() => {
-    // Obtener profesores
+   
     const obtenerProfesores = async () => {
       try {
         const response = await fetch(
@@ -34,7 +34,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Obtener asignaturas
+ 
     const obtenerAsignaturas = async () => {
       try {
         const response = await fetch(
@@ -49,7 +49,7 @@ export default function Home() {
     obtenerAsignaturas();
   }, []);
 
-  // Filtrar asignaturas que tienen un profesor asignado
+ 
   const asignaturasConProfesor = asignaturas.filter(asignatura =>
     profesores.some(profesor => profesor.asignaturas.includes(asignatura._id))
   );
@@ -66,7 +66,7 @@ export default function Home() {
 
           <div className="grid grid-cols-3 gap-10">
             {asignaturasConProfesor.map((asignatura, i) => {
-              // Obtener el profesor de la asignatura
+             
               const profesor = profesores.find(prof => prof.asignaturas.includes(asignatura._id));
 
               return (
@@ -88,7 +88,7 @@ export default function Home() {
                   </CardContent>
 
                   <CardActions>
-                    <Link href={`/paginas/profesores/asignatura/${asignatura._id}`} passHref>
+                    <Link href={`/paginas/profesores/asignatura/${asignatura._id}`} >
                       <Button size="small">
                         Ver más
                       </Button>

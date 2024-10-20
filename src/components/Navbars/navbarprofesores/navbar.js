@@ -17,9 +17,14 @@ import AdbIcon from "@mui/icons-material/Adb";
 import { getUser, logout } from "@/services/auth"; // Asegúrate de importar correctamente
 
 const pages = [
+
+  { name: 'Asignaturas', route: '/paginas/profesores/MisAsignatura' },
+  { name: 'Calendario', route: '/paginas/profesores/Calendario' },
+
   { name: "Asignaturas", route: "/paginas/profesores/asignatura" },
   { name: "Mis Asignatura", route: "/paginas/profesores/MisAsignatura" },
   { name: "Calendario", route: "/paginas/profesores/Calendario" },
+
 ];
 
 function NavbarProfesor() {
