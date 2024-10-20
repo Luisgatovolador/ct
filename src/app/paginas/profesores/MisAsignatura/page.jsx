@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/components/Navbars/navbarprofesores/navbar";
+import Navbar from '@/components/Navbars/navbar';
 import * as React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";

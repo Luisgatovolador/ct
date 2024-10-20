@@ -15,7 +15,7 @@ import {
   IconButton
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Navbar from '@/components/Navbars/navbarUsuarios/navbar';
+import Navbar from '@/components/Navbars/navbar';
 import Footer from '@/components/footer/footer';
 
 const Page = () => {

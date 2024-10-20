@@ -7,8 +7,8 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import Navbar from '@/components/Navbars/navbaradmins/navbar';
 import Footer from '@/components/footer/footer';
+import Navbar from '@/components/Navbars/navbar';
 
 const Page = () => {
   const [asignaturas, setAsignaturas] = useState([]);
