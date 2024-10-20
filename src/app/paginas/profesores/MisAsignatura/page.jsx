@@ -12,29 +12,34 @@ import Footer from "@/components/footer/footer";
 import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
 import Link from "next/link"; 
+import { getUser, logout } from "@/services/auth";
 
 export default function Home() {
   const [asignaturas, setAsignaturas] = React.useState([]);
   const [profesores, setProfesores] = React.useState([]);
 
+  const userData = getUser();
+
+  console.log (userData)
+
   useEffect(() => {
-   
     const obtenerProfesores = async () => {
       try {
         const response = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/profesor/"
+          `https://control-de-tareas-backend-production.up.railway.app/api/profesor/${userData._id}`
         );
         const data = await response.json();
-        setProfesores(data);
+        // Aseguramos que la respuesta es un array
+        setProfesores(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error al obtener los profesores", error);
+        setProfesores([]); // Si hay error, lo dejamos como array vacío
       }
     };
     obtenerProfesores();
   }, []);
 
   useEffect(() => {
- 
     const obtenerAsignaturas = async () => {
       try {
         const response = await fetch(
@@ -49,9 +54,8 @@ export default function Home() {
     obtenerAsignaturas();
   }, []);
 
- 
   const asignaturasConProfesor = asignaturas.filter(asignatura =>
-    profesores.some(profesor => profesor.asignaturas.includes(asignatura._id))
+    Array.isArray(profesores) && profesores.some(profesor => profesor.asignaturas.includes(asignatura._id))
   );
 
   return (
@@ -66,7 +70,6 @@ export default function Home() {
 
           <div className="grid grid-cols-3 gap-10">
             {asignaturasConProfesor.map((asignatura, i) => {
-             
               const profesor = profesores.find(prof => prof.asignaturas.includes(asignatura._id));
 
               return (
