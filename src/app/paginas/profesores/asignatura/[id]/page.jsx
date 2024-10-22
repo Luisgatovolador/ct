@@ -23,25 +23,25 @@ import DescriptionIcon from "@mui/icons-material/Description";
 
 
 function Page() {
-  const [asignaturas, setAsignaturas] = useState(null); // Asignatura específica
-  const [actividades, setActividad] = useState([]); // Actividades de la asignatura
-  const { id } = useParams(); // Obtener el ID de la URL
-  const [openModal, setOpenModal] = useState(false); // Estado para el modal de actividad
-  const [openPlaneacionModal, setOpenPlaneacionModal] = useState(false); // Estado para el modal de planeación
+  const [asignaturas, setAsignaturas] = useState(null); 
+  const [actividades, setActividad] = useState([]); 
+  const { id } = useParams(); 
+  const [openModal, setOpenModal] = useState(false); 
+  const [openPlaneacionModal, setOpenPlaneacionModal] = useState(false); 
   const [newActivity, setNewActivity] = useState({
     titulo: "",
     descripcion: "",
     fechaInicio: "",
     fechaFin: "",
-    planeacionID: id, // Usar el ID de la asignatura como referencia
+    planeacionID: id, 
   });
-  const [selectedActivity, setSelectedActivity] = useState(null); // Para actividad seleccionada
+  const [selectedActivity, setSelectedActivity] = useState(null); 
 
   const [newPlaneacion, setNewPlaneacion] = useState({
     nombre: "",
     fechaComienzo: "",
     fechaFin: "",
-    asignatura: id, // ID de la asignatura a la que pertenece la planeación
+    asignatura: id, 
   });
 
   // Obtener la asignatura basada en el ID
@@ -79,7 +79,7 @@ function Page() {
       }
     };
     obtenerActividad();
-  }, []); // Solo carga las actividades al montar el componente
+  }, []); 
 
   // Función para agregar nueva actividad
   const handleAddActivity = async () => {
@@ -95,7 +95,7 @@ function Page() {
         }
       );
       const result = await response.json();
-      setActividad([...actividades, result]); // Actualiza el estado de actividades
+      setActividad([...actividades, result]); 
       setOpenModal(false);
     } catch (error) {
       console.error("Error al agregar la actividad:", error);
@@ -123,13 +123,13 @@ function Page() {
           }
         );
         const result = await response.json();
-        // Actualiza la lista de actividades con la actividad modificada
+   
         setActividad((prevActividades) =>
           prevActividades.map((activity) =>
             activity._id === result._id ? result : activity
           )
         );
-        setOpenModal(false); // Cierra el modal después de actualizar
+        setOpenModal(false); 
       } catch (error) {
         console.error("Error al actualizar la actividad:", error);
       }
@@ -150,7 +150,7 @@ function Page() {
         }
       );
       const result = await response.json();
-      setOpenPlaneacionModal(false); // Cerrar el modal
+      setOpenPlaneacionModal(false); 
     } catch (error) {
       console.error("Error al agregar la planeación:", error);
     }
@@ -272,7 +272,7 @@ function Page() {
         <Footer />
       </Box>
 
-      {/* Modal para agregar o editar una actividad */}
+      
       <Modal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -365,7 +365,7 @@ function Page() {
         </Box>
       </Modal>
 
-      {/* Modal para agregar planeación */}
+    
       <Modal
         open={openPlaneacionModal}
         onClose={() => setOpenPlaneacionModal(false)}
