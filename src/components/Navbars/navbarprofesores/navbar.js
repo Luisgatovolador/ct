@@ -19,10 +19,6 @@ import { getUser, logout } from "@/services/auth"; // Asegúrate de importar cor
 const pages = [
 
   { name: 'Asignaturas', route: '/paginas/profesores/MisAsignatura' },
-  { name: 'Calendario', route: '/paginas/profesores/Calendario' },
-
-  { name: "Asignaturas", route: "/paginas/profesores/asignatura" },
-  { name: "Mis Asignatura", route: "/paginas/profesores/MisAsignatura" },
   { name: "Calendario", route: "/paginas/profesores/Calendario" },
 
 ];
