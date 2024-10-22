@@ -15,6 +15,7 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { getUser, logout } from "@/services/auth";
+import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
 
 const pages = [
   { name: "Asignaturas", route: "/paginas/administrador/asignatura" },
@@ -31,10 +32,17 @@ function NavbarAdmin() {
   const [userData, setUserData] = useState(null); // Estado inicial
 
   useEffect(() => {
-    // Obtener userData solo en el cliente
+    const fetchedUser = getUser();
+    if (fetchedUser) {
+      setUserData(fetchedUser);
+    }
     const user = getUser();
     setUserData(user);
   }, []);
+
+  if (!userData) {
+    return <NavbarWithoutLogin />;
+  }
 
   const settings = userData
     ? [
@@ -58,8 +66,12 @@ function NavbarAdmin() {
     router.push(route);
   };
 
-  const handleCloseUserMenu = () => {
+  const handleCloseUserMenu = (setting) => {
     setAnchorElUser(null);
+    if (setting === "Logout") {
+      logout();
+      router.push("/");
+    }
   };
 
   return (
@@ -71,7 +83,7 @@ function NavbarAdmin() {
             variant="h6"
             noWrap
             component="a"
-            href="/paginas/administrador/home"
+            href="/paginas/estudiantes/home"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -82,13 +94,13 @@ function NavbarAdmin() {
               textDecoration: "none",
             }}
           >
-            LOGO
+            CT
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"
-              aria-label="menu de navegación"
+              aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
@@ -109,7 +121,7 @@ function NavbarAdmin() {
                 horizontal: "left",
               }}
               open={Boolean(anchorElNav)}
-              onClose={() => setAnchorElNav(null)}
+              onClose={() => handleCloseNavMenu("")}
               sx={{ display: { xs: "block", md: "none" } }}
             >
               {pages.map((page) => (
@@ -122,26 +134,6 @@ function NavbarAdmin() {
               ))}
             </Menu>
           </Box>
-
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            LOGO
-          </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
@@ -156,21 +148,18 @@ function NavbarAdmin() {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            {userData && (
-              <Box sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
-                <Typography sx={{ mr: 1, color: "white" }}>
-                  {userData.nombre}
-                </Typography>
-                <Tooltip title="Abrir configuraciones">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt={userData.nombre}>
-                      {userData.nombre?.charAt(0)}
-                    </Avatar>
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            )}
-
+            <Box sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
+              <Typography sx={{ mr: 1, color: "white" }}>
+                {userData.nombre}
+              </Typography>
+              <Tooltip title="Abrir configuraciones">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt={userData.nombre}>
+                    {userData.nombre?.charAt(0)}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+            </Box>
             <Menu
               sx={{ mt: "45px" }}
               id="menu-appbar"
@@ -185,12 +174,12 @@ function NavbarAdmin() {
                 horizontal: "right",
               }}
               open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
+              onClose={() => handleCloseUserMenu(null)}
             >
               {settings.map((setting, index) => (
                 <MenuItem
                   key={setting.name || index}
-                  onClick={setting.action || handleCloseUserMenu}
+                  onClick={() => handleCloseUserMenu(setting.name)}
                 >
                   <Typography textAlign="center">{setting.name}</Typography>
                 </MenuItem>

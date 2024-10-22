@@ -15,6 +15,7 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { getUser, logout } from "@/services/auth"; // Asegúrate de importar correctamente
+import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
 
 const pages = [
 
@@ -27,8 +28,19 @@ function NavbarProfesor() {
   const router = useRouter();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const userData = getUser();
 
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchedUser = getUser();
+    if(fetchedUser){
+      setUserData(fetchedUser)
+    }
+  }, []);
+
+  if(!userData){
+    return <NavbarWithoutLogin />
+  }
   const settings = [
     { name: userData.nombre, action: null },
     { name: "Account", action: null },
@@ -51,8 +63,8 @@ function NavbarProfesor() {
   const handleCloseUserMenu = (setting) => {
     setAnchorElUser(null);
     if (setting === "Logout") {
-      logout(); // Llama la función logout para cerrar sesión
-      router.push("/"); // Redirige al inicio
+      logout();
+      router.push("/");
     }
   };
 
@@ -76,7 +88,7 @@ function NavbarProfesor() {
               textDecoration: "none",
             }}
           >
-            LOGO
+            CT
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>

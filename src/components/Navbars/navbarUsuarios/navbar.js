@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Importa el hook useRouter
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -15,6 +15,7 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { getUser, logout } from "@/services/auth";
+import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
 
 const pages = [
   { name: "Asignaturas", route: "/paginas/estudiantes/asignatura" },
@@ -23,9 +24,20 @@ const pages = [
 
 function NavbarAlumno() {
   const router = useRouter();
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const userData = getUser();
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const [anchorElUser, setAnchorElUser] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchedUser = getUser();
+    if(fetchedUser){
+      setUserData(fetchedUser);
+    }
+  }, []);
+
+  if(!userData){
+    return <NavbarWithoutLogin />
+  }
 
   const settings = [
     { name: userData.nombre, action: null },
@@ -77,7 +89,7 @@ function NavbarAlumno() {
               textDecoration: "none",
             }}
           >
-            LOGO
+            CT
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
