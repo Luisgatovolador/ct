@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import {useState, useEffect} from "react";
 import { useRouter } from "next/navigation";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -26,8 +26,8 @@ const pages = [
 
 function NavbarProfesor() {
   const router = useRouter();
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const [anchorElUser, setAnchorElUser] = useState(null);
 
   const [userData, setUserData] = useState(null);
 
