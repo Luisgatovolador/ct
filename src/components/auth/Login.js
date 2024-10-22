@@ -64,13 +64,13 @@ export default function SignIn() {
         saveUser(data.user);
 
         if (data.user.rol === "Alumno") {
-          router.push("/paginas/estudiantes/Home");
+          router.push("/paginas/estudiantes/home");
         }
         if (data.user.rol==="Profesor"){
-          router.push("/paginas/profesores/Home");
+          router.push("/paginas/profesores/home");
         }
         if (data.user.rol==="Administrador"){
-          router.push("/paginas/administrador/Home");
+          router.push("/paginas/administrador/home");
         }
       } else {
         setErrorMessage(data.message || "Error al iniciar sesión");

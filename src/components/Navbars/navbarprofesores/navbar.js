@@ -19,8 +19,8 @@ import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
 
 const pages = [
 
-  { name: 'Asignaturas', route: '/paginas/profesores/MisAsignatura' },
-  { name: "Calendario", route: "/paginas/profesores/Calendario" },
+  { name: 'Asignaturas', route: '/paginas/profesores/misAsignatura' },
+  { name: "Calendario", route: "/paginas/profesores/calendario" },
 
 ];
 
