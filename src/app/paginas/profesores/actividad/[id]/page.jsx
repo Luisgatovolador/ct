@@ -8,9 +8,6 @@ import {
   CardContent,
   Typography,
   Button,
-  List,
-  ListItem,
-  ListItemText,
   Box,
   TextField,
   Paper,
@@ -23,6 +20,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Navbar from '@/components/Navbars/navbar';
 import Footer from '@/components/footer/footer';
+import { useParams } from "next/navigation";
 
 const Page = () => {
   const [archivosSubidos, setArchivosSubidos] = useState([]);
@@ -30,29 +28,49 @@ const Page = () => {
   const [filtroEstado, setFiltroEstado] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const tareasPorPagina = 5;
+  const { id } = useParams();
   const [calificacion, setCalificacion] = useState("");
   const [retroalimentacion, setRetroalimentacion] = useState("");
   const [tareas, setTareas] = useState([]); // Estado para almacenar las tareas desde la DB
+
+  useEffect(() => {
+    const obteneractividad = async () => {
+      if (id) {
+        try {
+          const response = await fetch(
+            `https://control-de-tareas-backend-production.up.railway.app/api/actividad/${id}`
+          );
+          const data = await response.json();
+          console.log(data)
+        } catch (error) {
+          console.error("Error al obtener la asignatura:", error);
+        }
+      }
+    };
+    obteneractividad();
+  }, [id]);
 
   // 1. Cargar tareas desde la base de datos al montar el componente
   useEffect(() => {
     async function obtenerTareas() {
       try {
-        const response = await fetch('/api/tareas'); // Aquí llamas a tu método para obtener las tareas
+        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/tarea/'); 
         const data = await response.json();
-        setTareas(data);
+        // Filtrar tareas para que solo se muestren las que corresponden a la actividad actual
+        const tareasFiltradas = data.filter(tarea => tarea.actividad === id);
+        setTareas(tareasFiltradas);
       } catch (error) {
         console.error("Error al obtener las tareas", error);
       }
     }
     
     obtenerTareas();
-  }, []);
+  }, [id]); // Añadir 'id' como dependencia para obtener tareas relacionadas con la actividad actual
 
   // 2. Función para actualizar la calificación de una tarea
   const manejarCalificacion = async (tareaId) => {
     try {
-      await fetch(`/api/tareas/${tareaId}`, {
+      await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/tarea/${tareaId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -61,7 +79,7 @@ const Page = () => {
       });
       // Actualiza las tareas en el frontend después de calificar
       const nuevasTareas = tareas.map((tarea) =>
-        tarea.id === tareaId ? { ...tarea, calificacion, retroalimentacion } : tarea
+        tarea._id === tareaId ? { ...tarea, calificacion, retroalimentacion } : tarea
       );
       setTareas(nuevasTareas);
     } catch (error) {
@@ -83,7 +101,7 @@ const Page = () => {
 
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
 
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
@@ -201,7 +219,7 @@ const Page = () => {
                         </AccordionSummary>
                         <AccordionDetails>
                           <Typography>{tarea.descripcion}</Typography>
-                          <Button size="small" sx={{ marginTop: 1 }} onClick={() => setSelectedTareaId(tarea.id)}>
+                          <Button size="small" sx={{ marginTop: 1 }} onClick={() => setSelectedTareaId(tarea._id)}>
                             Calificar
                           </Button>
                         </AccordionDetails>

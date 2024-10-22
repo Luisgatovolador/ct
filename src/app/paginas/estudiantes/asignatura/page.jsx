@@ -46,6 +46,7 @@ function Page() {
       setAreas(areasData);
       setAsignaturas(asignaturasData);
       setDataUser(alumnoData);
+      
     } catch (error) {
       console.error("Error fetching data:", error);
     }

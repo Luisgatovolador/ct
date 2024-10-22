@@ -18,6 +18,9 @@ import Navbar from "@/components/Navbars/navbarprofesores/navbar";
 import Footer from "@/components/footer/footer";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import DateRangeIcon from "@mui/icons-material/DateRange";
+import DescriptionIcon from "@mui/icons-material/Description";
+
 
 function Page() {
   const [asignaturas, setAsignaturas] = useState(null); // Asignatura específica
@@ -32,6 +35,7 @@ function Page() {
     fechaFin: "",
     planeacionID: id, // Usar el ID de la asignatura como referencia
   });
+  const [selectedActivity, setSelectedActivity] = useState(null); // Para actividad seleccionada
 
   const [newPlaneacion, setNewPlaneacion] = useState({
     nombre: "",
@@ -66,7 +70,10 @@ function Page() {
           "https://control-de-tareas-backend-production.up.railway.app/api/actividad/"
         );
         const data = await response.json();
-        setActividad(data);
+        const filtroActividadporAsignarutas = data.filter((actividad)=>
+        id.includes(actividad.planeacionID)
+        );
+        setActividad(filtroActividadporAsignarutas);
       } catch (error) {
         console.error("Error al obtener tarea:", error);
       }
@@ -88,10 +95,44 @@ function Page() {
         }
       );
       const result = await response.json();
-      setTarea([...tarea, result]);
+      setActividad([...actividades, result]); // Actualiza el estado de actividades
       setOpenModal(false);
     } catch (error) {
       console.error("Error al agregar la actividad:", error);
+    }
+  };
+
+  // Función para editar una actividad seleccionada
+  const handleEditActivity = (activity) => {
+    setSelectedActivity(activity);
+    setOpenModal(true);
+  };
+
+  // Función para actualizar la actividad seleccionada
+  const handleUpdateActivity = async () => {
+    if (selectedActivity) {
+      try {
+        const response = await fetch(
+          `https://control-de-tareas-backend-production.up.railway.app/api/actividad/${selectedActivity._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(selectedActivity),
+          }
+        );
+        const result = await response.json();
+        // Actualiza la lista de actividades con la actividad modificada
+        setActividad((prevActividades) =>
+          prevActividades.map((activity) =>
+            activity._id === result._id ? result : activity
+          )
+        );
+        setOpenModal(false); // Cierra el modal después de actualizar
+      } catch (error) {
+        console.error("Error al actualizar la actividad:", error);
+      }
     }
   };
 
@@ -109,7 +150,6 @@ function Page() {
         }
       );
       const result = await response.json();
-      // Aquí puedes actualizar el estado o realizar alguna acción después de agregar la planeación
       setOpenPlaneacionModal(false); // Cerrar el modal
     } catch (error) {
       console.error("Error al agregar la planeación:", error);
@@ -146,10 +186,7 @@ function Page() {
                     <Typography variant="h4" component="h2" gutterBottom>
                       Actividades Pendientes
                     </Typography>
-                    {/* Botón para agregar actividad */}
                   </Box>
-
-                  {/* Botón para agregar planeación */}
 
                   {actividades.map((activity, index) => (
                     <Accordion key={index}>
@@ -158,24 +195,37 @@ function Page() {
                         aria-controls={`panel${index}-content`}
                         id={`panel${index}-header`}
                       >
-                        <Typography>{activity.titulo}</Typography>
+                        <Typography variant="h6" color="textPrimary">
+                          {activity.titulo}
+                        </Typography>
                       </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography>{activity.descripcion}</Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            marginTop: 1,
-                          }}
-                        >
-                          <Link
-                            href={`/paginas/profesores/actividad/${activity._id}`}
-                          >
-                            <Button size="small" sx={{ marginTop: 1 }}>
+                      <AccordionDetails sx={{ backgroundColor: "#f0f0f0", borderRadius: "8px" }}>
+                        <Typography variant="body1" sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}>
+                          <DateRangeIcon sx={{ marginRight: 1 }} /> 
+                          Fecha de inicio: {activity.fechaInicio}
+                        </Typography>
+                        <Typography variant="body1" sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}>
+                          <DateRangeIcon sx={{ marginRight: 1 }} /> 
+                          Fecha de entrega: {activity.fechaFin}
+                        </Typography>
+                        <Typography variant="body1" sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}>
+                          <DescriptionIcon sx={{ marginRight: 1 }} /> 
+                          Descripción: {activity.descripcion}
+                        </Typography>
+                        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                          <Link href={`/paginas/profesores/actividad/${activity._id}`}>
+                            <Button variant="outlined" size="small" sx={{ marginRight: 1 }}>
                               Ver Más
                             </Button>
                           </Link>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="secondary"
+                            onClick={() => handleEditActivity(activity)}
+                          >
+                            Editar
+                          </Button>
                         </Box>
                       </AccordionDetails>
                     </Accordion>
@@ -222,7 +272,7 @@ function Page() {
         <Footer />
       </Box>
 
-      {/* Modal para agregar una nueva actividad */}
+      {/* Modal para agregar o editar una actividad */}
       <Modal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -243,24 +293,34 @@ function Page() {
           }}
         >
           <Typography id="modal-title" variant="h6" component="h2">
-            Agregar Nueva Actividad
+            {selectedActivity ? "Editar Actividad" : "Agregar Nueva Actividad"}
           </Typography>
           <TextField
             label="Título de la actividad"
             fullWidth
             sx={{ marginBottom: 2 }}
-            value={newActivity.titulo}
+            value={selectedActivity ? selectedActivity.titulo : newActivity.titulo}
             onChange={(e) =>
-              setNewActivity({ ...newActivity, titulo: e.target.value })
+              selectedActivity
+                ? setSelectedActivity({
+                    ...selectedActivity,
+                    titulo: e.target.value,
+                  })
+                : setNewActivity({ ...newActivity, titulo: e.target.value })
             }
           />
           <TextField
             label="Descripción de la actividad"
             fullWidth
             sx={{ marginBottom: 2 }}
-            value={newActivity.descripcion}
+            value={selectedActivity ? selectedActivity.descripcion : newActivity.descripcion}
             onChange={(e) =>
-              setNewActivity({ ...newActivity, descripcion: e.target.value })
+              selectedActivity
+                ? setSelectedActivity({
+                    ...selectedActivity,
+                    descripcion: e.target.value,
+                  })
+                : setNewActivity({ ...newActivity, descripcion: e.target.value })
             }
           />
           <TextField
@@ -269,9 +329,14 @@ function Page() {
             type="date"
             sx={{ marginBottom: 2 }}
             InputLabelProps={{ shrink: true }}
-            value={newActivity.fechaInicio}
+            value={selectedActivity ? selectedActivity.fechaInicio : newActivity.fechaInicio}
             onChange={(e) =>
-              setNewActivity({ ...newActivity, fechaInicio: e.target.value })
+              selectedActivity
+                ? setSelectedActivity({
+                    ...selectedActivity,
+                    fechaInicio: e.target.value,
+                  })
+                : setNewActivity({ ...newActivity, fechaInicio: e.target.value })
             }
           />
           <TextField
@@ -280,27 +345,32 @@ function Page() {
             type="date"
             sx={{ marginBottom: 2 }}
             InputLabelProps={{ shrink: true }}
-            value={newActivity.fechaFin}
+            value={selectedActivity ? selectedActivity.fechaFin : newActivity.fechaFin}
             onChange={(e) =>
-              setNewActivity({ ...newActivity, fechaFin: e.target.value })
+              selectedActivity
+                ? setSelectedActivity({
+                    ...selectedActivity,
+                    fechaFin: e.target.value,
+                  })
+                : setNewActivity({ ...newActivity, fechaFin: e.target.value })
             }
           />
           <Button
             variant="contained"
             color="primary"
-            onClick={handleAddActivity}
+            onClick={selectedActivity ? handleUpdateActivity : handleAddActivity}
           >
-            Guardar Actividad
+            {selectedActivity ? "Actualizar Actividad" : "Guardar Actividad"}
           </Button>
         </Box>
       </Modal>
 
-      {/* Modal para agregar una nueva planeación */}
+      {/* Modal para agregar planeación */}
       <Modal
         open={openPlaneacionModal}
         onClose={() => setOpenPlaneacionModal(false)}
-        aria-labelledby="modal-planeacion-title"
-        aria-describedby="modal-planeacion-description"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
       >
         <Box
           sx={{
@@ -315,11 +385,11 @@ function Page() {
             p: 4,
           }}
         >
-          <Typography id="modal-planeacion-title" variant="h6" component="h2">
-            Agregar Nueva Planeación
+          <Typography id="modal-title" variant="h6" component="h2">
+            Agregar Planeación
           </Typography>
           <TextField
-            label="Nombre de la planeación"
+            label="Nombre de la Planeación"
             fullWidth
             sx={{ marginBottom: 2 }}
             value={newPlaneacion.nombre}
@@ -349,7 +419,10 @@ function Page() {
             InputLabelProps={{ shrink: true }}
             value={newPlaneacion.fechaFin}
             onChange={(e) =>
-              setNewPlaneacion({ ...newPlaneacion, fechaFin: e.target.value })
+              setNewPlaneacion({
+                ...newPlaneacion,
+                fechaFin: e.target.value,
+              })
             }
           />
           <Button
