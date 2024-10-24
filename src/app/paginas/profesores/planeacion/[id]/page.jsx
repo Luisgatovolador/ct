@@ -153,7 +153,7 @@ function Page() {
     }
   };
 
-  // Función para actualizar la planeación existente
+  // Función para actualizar la planeación 
   const handleUpdatePlaneacion = async () => {
     try {
       const response = await fetch(
