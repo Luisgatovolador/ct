@@ -21,9 +21,8 @@ import { useParams } from "next/navigation";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DescriptionIcon from "@mui/icons-material/Description";
 
-
 function Page() {
-  const [asignaturas, setAsignaturas] = useState(null); 
+  const [planeacion, setPlaneacion] = useState(null); 
   const [actividades, setActividad] = useState([]); 
   const { id } = useParams(); 
   const [openModal, setOpenModal] = useState(false); 
@@ -33,7 +32,7 @@ function Page() {
     descripcion: "",
     fechaInicio: "",
     fechaFin: "",
-    planeacionID: id, 
+    planeacionID: id, // Aquí se usa el ID de la planeación
   });
   const [selectedActivity, setSelectedActivity] = useState(null); 
 
@@ -44,25 +43,25 @@ function Page() {
     asignatura: id, 
   });
 
-  // Obtener la asignatura basada en el ID
+  // Obtener la planeación basada en el ID
   useEffect(() => {
-    const obtenerAsignatura = async () => {
+    const obtenerPlaneacion = async () => {
       if (id) {
         try {
           const response = await fetch(
-            `https://control-de-tareas-backend-production.up.railway.app/api/asignatura/${id}`
+            `https://control-de-tareas-backend-production.up.railway.app/api/planeacion/${id}`
           );
           const data = await response.json();
-          setAsignaturas(data);
+          setPlaneacion(data);
         } catch (error) {
-          console.error("Error al obtener la asignatura:", error);
+          console.error("Error al obtener la planeación:", error);
         }
       }
     };
-    obtenerAsignatura();
+    obtenerPlaneacion();
   }, [id]);
 
-  // Obtener las actividades relacionadas con la asignatura
+  // Obtener las actividades relacionadas con la planeación
   useEffect(() => {
     const obtenerActividad = async () => {
       try {
@@ -70,16 +69,16 @@ function Page() {
           "https://control-de-tareas-backend-production.up.railway.app/api/actividad/"
         );
         const data = await response.json();
-        const filtroActividadporAsignarutas = data.filter((actividad)=>
-        id.includes(actividad.planeacionID)
+        const filtroActividadPorPlaneacion = data.filter((actividad) =>
+          id.includes(actividad.planeacionID)
         );
-        setActividad(filtroActividadporAsignarutas);
+        setActividad(filtroActividadPorPlaneacion);
       } catch (error) {
         console.error("Error al obtener tarea:", error);
       }
     };
     obtenerActividad();
-  }, []); 
+  }, [id]);
 
   // Función para agregar nueva actividad
   const handleAddActivity = async () => {
@@ -123,7 +122,6 @@ function Page() {
           }
         );
         const result = await response.json();
-   
         setActividad((prevActividades) =>
           prevActividades.map((activity) =>
             activity._id === result._id ? result : activity
@@ -133,26 +131,6 @@ function Page() {
       } catch (error) {
         console.error("Error al actualizar la actividad:", error);
       }
-    }
-  };
-
-  // Función para agregar nueva planeación
-  const handleAddPlaneacion = async () => {
-    try {
-      const response = await fetch(
-        "https://control-de-tareas-backend-production.up.railway.app/api/planeacion/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newPlaneacion),
-        }
-      );
-      const result = await response.json();
-      setOpenPlaneacionModal(false); 
-    } catch (error) {
-      console.error("Error al agregar la planeación:", error);
     }
   };
 
@@ -166,7 +144,7 @@ function Page() {
         <div className="px-44" style={{ flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h6" component="h3">
-              {asignaturas ? asignaturas.nombre : "Cargando asignatura..."}
+              {planeacion ? planeacion.nombre : "Cargando planeación..."}
             </Typography>
           </Paper>
           <br />
@@ -256,14 +234,6 @@ function Page() {
                   >
                     Agregar Actividad
                   </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setOpenPlaneacionModal(true)}
-                    sx={{ width: "100%" }} // Ocupa todo el ancho
-                  >
-                    Agregar Planeación
-                  </Button>
                 </Paper>
               </Grid>
             </Grid>
@@ -272,7 +242,6 @@ function Page() {
         <Footer />
       </Box>
 
-      
       <Modal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -293,145 +262,50 @@ function Page() {
           }}
         >
           <Typography id="modal-title" variant="h6" component="h2">
-            {selectedActivity ? "Editar Actividad" : "Agregar Nueva Actividad"}
+            {selectedActivity ? "Editar Actividad" : "Agregar Actividad"}
           </Typography>
+
           <TextField
-            label="Título de la actividad"
+            label="Título"
             fullWidth
+            value={newActivity.titulo}
+            onChange={(e) => setNewActivity({ ...newActivity, titulo: e.target.value })}
             sx={{ marginBottom: 2 }}
-            value={selectedActivity ? selectedActivity.titulo : newActivity.titulo}
-            onChange={(e) =>
-              selectedActivity
-                ? setSelectedActivity({
-                    ...selectedActivity,
-                    titulo: e.target.value,
-                  })
-                : setNewActivity({ ...newActivity, titulo: e.target.value })
-            }
           />
           <TextField
-            label="Descripción de la actividad"
+            label="Descripción"
             fullWidth
+            value={newActivity.descripcion}
+            onChange={(e) => setNewActivity({ ...newActivity, descripcion: e.target.value })}
             sx={{ marginBottom: 2 }}
-            value={selectedActivity ? selectedActivity.descripcion : newActivity.descripcion}
-            onChange={(e) =>
-              selectedActivity
-                ? setSelectedActivity({
-                    ...selectedActivity,
-                    descripcion: e.target.value,
-                  })
-                : setNewActivity({ ...newActivity, descripcion: e.target.value })
-            }
           />
           <TextField
             label="Fecha de Inicio"
             fullWidth
             type="date"
+            value={newActivity.fechaInicio}
+            onChange={(e) => setNewActivity({ ...newActivity, fechaInicio: e.target.value })}
             sx={{ marginBottom: 2 }}
             InputLabelProps={{ shrink: true }}
-            value={selectedActivity ? selectedActivity.fechaInicio : newActivity.fechaInicio}
-            onChange={(e) =>
-              selectedActivity
-                ? setSelectedActivity({
-                    ...selectedActivity,
-                    fechaInicio: e.target.value,
-                  })
-                : setNewActivity({ ...newActivity, fechaInicio: e.target.value })
-            }
           />
           <TextField
-            label="Fecha de Fin"
+            label="Fecha de Entrega"
             fullWidth
             type="date"
+            value={newActivity.fechaFin}
+            onChange={(e) => setNewActivity({ ...newActivity, fechaFin: e.target.value })}
             sx={{ marginBottom: 2 }}
             InputLabelProps={{ shrink: true }}
-            value={selectedActivity ? selectedActivity.fechaFin : newActivity.fechaFin}
-            onChange={(e) =>
-              selectedActivity
-                ? setSelectedActivity({
-                    ...selectedActivity,
-                    fechaFin: e.target.value,
-                  })
-                : setNewActivity({ ...newActivity, fechaFin: e.target.value })
-            }
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={selectedActivity ? handleUpdateActivity : handleAddActivity}
-          >
-            {selectedActivity ? "Actualizar Actividad" : "Guardar Actividad"}
-          </Button>
-        </Box>
-      </Modal>
 
-    
-      <Modal
-        open={openPlaneacionModal}
-        onClose={() => setOpenPlaneacionModal(false)}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Typography id="modal-title" variant="h6" component="h2">
-            Agregar Planeación
-          </Typography>
-          <TextField
-            label="Nombre de la Planeación"
-            fullWidth
-            sx={{ marginBottom: 2 }}
-            value={newPlaneacion.nombre}
-            onChange={(e) =>
-              setNewPlaneacion({ ...newPlaneacion, nombre: e.target.value })
-            }
-          />
-          <TextField
-            label="Fecha de Comienzo"
-            fullWidth
-            type="date"
-            sx={{ marginBottom: 2 }}
-            InputLabelProps={{ shrink: true }}
-            value={newPlaneacion.fechaComienzo}
-            onChange={(e) =>
-              setNewPlaneacion({
-                ...newPlaneacion,
-                fechaComienzo: e.target.value,
-              })
-            }
-          />
-          <TextField
-            label="Fecha de Fin"
-            fullWidth
-            type="date"
-            sx={{ marginBottom: 2 }}
-            InputLabelProps={{ shrink: true }}
-            value={newPlaneacion.fechaFin}
-            onChange={(e) =>
-              setNewPlaneacion({
-                ...newPlaneacion,
-                fechaFin: e.target.value,
-              })
-            }
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAddPlaneacion}
-          >
-            Guardar Planeación
-          </Button>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}>
+            <Button onClick={() => setOpenModal(false)} sx={{ marginRight: 1 }}>
+              Cancelar
+            </Button>
+            <Button variant="contained" onClick={handleAddActivity}>
+              {selectedActivity ? "Guardar Cambios" : "Agregar"}
+            </Button>
+          </Box>
         </Box>
       </Modal>
     </>
