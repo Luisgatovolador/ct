@@ -12,10 +12,10 @@ import CardActionArea from "@mui/material/CardActionArea";
 import CardActions from "@mui/material/CardActions";
 import Footer from "@/components/footer/footer";
 import Paper from "@mui/material/Paper";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [asignatura, setAsignatura] = React.useState([]);
+  const [asignatura, setAsignatura] = useState([]);
 
   useEffect(() => {
     const Asignaturas = async () => {
