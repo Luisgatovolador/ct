@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -8,6 +8,8 @@ import { es } from "date-fns/locale";
 import { Container, Typography } from "@mui/material";
 import Navbar from '@/components/Navbars/navbar';
 import Footer from "@/components/footer/footer";
+
+
 
 // Configuración de locales para el calendario en español
 const locales = {
@@ -23,6 +25,27 @@ const localizer = dateFnsLocalizer({
 });
 
 const Page = () => {
+  const [actividad,setActividad] = useState([]);
+
+  useEffect(() => {
+    const obtenerActividad = async () => {
+      try {
+        const response = await fetch(
+          "https://control-de-tareas-backend-production.up.railway.app/api/actividad/"
+        );
+        const data = await response.json();
+        const filtroActividadporAsignarutas = data.filter((actividad)=>
+        id.includes(actividad.planeacionID)
+        );
+        setActividad(filtroActividadporAsignarutas);
+      } catch (error) {
+        console.error("Error al obtener tarea:", error);
+      }
+    };
+    obtenerActividad();
+  }, []); 
+
+
   const actividades = [
     {
       _id: "1",

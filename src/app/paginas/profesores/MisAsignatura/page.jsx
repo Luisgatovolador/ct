@@ -35,10 +35,10 @@ function Home() {
 
   const fetchData = async (userId) => {
     try {
-      // Obtener datos del profesor
+     
       const profesorResponse = await fetch(`${API_URL}/profesor/${userId}`);
       const profesor = await profesorResponse.json();
-      setProfesorData(profesor); // Guardar los datos del profesor logueado
+      setProfesorData(profesor); 
 
       // Obtener asignaturas
       const asignaturasResponse = await fetch(`${API_URL}/asignatura`);
@@ -50,16 +50,33 @@ function Home() {
         const filteredAsignaturas = asignaturasData.filter((asignatura) =>
           profesor.asignaturas.includes(asignatura._id)
         );
-        setAsignaturasFiltradas(filteredAsignaturas); // Actualizar el estado con las asignaturas filtradas
+        setAsignaturasFiltradas(filteredAsignaturas); 
 
-        // Mueve el console.log aquí para que esté en el mismo alcance
-        console.log(filteredAsignaturas);
+      
       }
-
-      console.log(profesor);
-      console.log(asignaturasData);
     } catch (error) {
       console.error("Error fetching data:", error);
+    }
+  };
+
+
+   // Función para agregar nueva planeación
+   const handleAddPlaneacion = async () => {
+    try {
+      const response = await fetch(
+        "https://control-de-tareas-backend-production.up.railway.app/api/planeacion/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newPlaneacion),
+        }
+      );
+      const result = await response.json();
+      setOpenPlaneacionModal(false); 
+    } catch (error) {
+      console.error("Error al agregar la planeación:", error);
     }
   };
 

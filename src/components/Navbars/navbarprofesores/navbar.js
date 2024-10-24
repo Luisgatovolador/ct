@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -19,15 +19,15 @@ import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
 
 const pages = [
 
-  { name: 'Asignaturas', route: '/paginas/profesores/misAsignatura' },
+  { name: 'Asignaturas', route: '/paginas/profesores/planeaciones' },
   { name: "Calendario", route: "/paginas/profesores/calendario" },
 
 ];
 
 function NavbarProfesor() {
   const router = useRouter();
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const [anchorElUser, setAnchorElUser] = useState(null);
 
   const [userData, setUserData] = useState(null);
 
