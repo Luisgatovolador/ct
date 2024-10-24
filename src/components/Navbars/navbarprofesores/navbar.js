@@ -1,5 +1,9 @@
 "use client";
+
 import { useState, useEffect } from "react";
+
+
+
 import { useRouter } from "next/navigation";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -77,7 +81,7 @@ function NavbarProfesor() {
             variant="h6"
             noWrap
             component="a"
-            href="/paginas/profesores/Home"
+            href="/paginas/profesores/home"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
