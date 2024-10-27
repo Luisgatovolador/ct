@@ -13,10 +13,10 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
-import Plot from "react-plotly.js"; // Importa la librería Plotly para el gráfico
+import Plot from "react-plotly.js";
 import { getUser } from "@/services/auth";
 
-const API_URL = "http://localhost:3001/api";
+const API_URL = "https://control-de-tareas-backend-production.up.railway.app/api";
 
 function Page() {
   const [user, setUser] = useState(null);
