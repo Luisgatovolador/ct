@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Grid,
@@ -15,100 +15,142 @@ import {
   AccordionSummary,
   AccordionDetails,
   MenuItem,
-  Pagination
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Navbar from '@/components/Navbars/navbar';
-import Footer from '@/components/footer/footer';
+  Snackbar,
+  Pagination,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Navbar from "@/components/Navbars/navbar";
+import Footer from "@/components/footer/footer";
 import { useParams } from "next/navigation";
 
+const API_URL =
+  "https://control-de-tareas-backend-production.up.railway.app/api";
+const API_URL_PA_IMAGENES =
+  "https://control-de-tareas-backend-production.up.railway.app/uploads/";
+
 const Page = () => {
-  const [archivosSubidos, setArchivosSubidos] = useState([]);
   const [busquedaAlumno, setBusquedaAlumno] = useState("");
+  const [actividad, setActividad] = useState({});
   const [filtroEstado, setFiltroEstado] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const tareasPorPagina = 5;
   const { id } = useParams();
-  const [calificacion, setCalificacion] = useState("");
-  const [retroalimentacion, setRetroalimentacion] = useState("");
-  const [tareas, setTareas] = useState([]); // Estado para almacenar las tareas desde la DB
+  const [tareas, setTareas] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const [calificacionTemp, setCalificacionTemp] = useState({});
+  const [retroalimentacionTemp, setRetroalimentacionTemp] = useState({});
+  const [estadoTemp, setEstadoTemp] = useState({});
 
   useEffect(() => {
-    const obteneractividad = async () => {
+    const obtenerActividad = async () => {
       if (id) {
         try {
-          const response = await fetch(
-            `https://control-de-tareas-backend-production.up.railway.app/api/actividad/${id}`
-          );
+          const response = await fetch(`${API_URL}/actividad/${id}`);
           const data = await response.json();
-          console.log(data)
+          setActividad(data);
         } catch (error) {
-          console.error("Error al obtener la asignatura:", error);
+          console.error("Error al obtener la actividad:", error);
         }
       }
     };
-    obteneractividad();
+    obtenerActividad();
   }, [id]);
 
-  // 1. Cargar tareas desde la base de datos al montar el componente
   useEffect(() => {
-    async function obtenerTareas() {
+    const obtenerTareas = async () => {
       try {
-        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/tarea/'); 
+        const response = await fetch(`${API_URL}/tarea/`);
         const data = await response.json();
-        // Filtrar tareas para que solo se muestren las que corresponden a la actividad actual
-        const tareasFiltradas = data.filter(tarea => tarea.actividad === id);
-        setTareas(tareasFiltradas);
+        const tareasFiltradas = data.filter((tarea) => tarea.actividad === id);
+        const tareasConNombreAlumno = await Promise.all(
+          tareasFiltradas.map(async (tarea) => {
+            const response = await fetch(`${API_URL}/alumno/${tarea.alumno}`);
+            const dataAlumnos = await response.json();
+            return {
+              ...tarea,
+              NombredelAlumno: dataAlumnos.nombre,
+            };
+          })
+        );
+        setTareas(tareasConNombreAlumno);
       } catch (error) {
         console.error("Error al obtener las tareas", error);
       }
-    }
-    
-    obtenerTareas();
-  }, [id]); // Añadir 'id' como dependencia para obtener tareas relacionadas con la actividad actual
+    };
 
-  // 2. Función para actualizar la calificación de una tarea
-  const manejarCalificacion = async (tareaId) => {
+    obtenerTareas();
+  }, [id]);
+
+  const manejarCalificacion = async (tareaID) => {
+    const calificacion = calificacionTemp[tareaID] || 0;
+    const retroalimentacion = retroalimentacionTemp[tareaID] || "";
+    const estado = estadoTemp[tareaID] || "Revisado";
+
     try {
-      await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/tarea/${tareaId}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_URL}/tarea/${tareaID}`, {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ calificacion, retroalimentacion })
+        body: JSON.stringify({ calificacion, retroalimentacion, estado }),
       });
-      // Actualiza las tareas en el frontend después de calificar
+
+      if (!response.ok) {
+        throw new Error("Error al guardar la calificación");
+      }
+
+      const tareaActualizada = await response.json();
+
       const nuevasTareas = tareas.map((tarea) =>
-        tarea._id === tareaId ? { ...tarea, calificacion, retroalimentacion } : tarea
+        tarea._id === tareaID
+          ? { ...tarea, calificacion, retroalimentacion, estado }
+          : tarea
       );
+
       setTareas(nuevasTareas);
+      setSnackbarMessage("Calificación guardada con éxito");
+      setSnackbarOpen(true);
     } catch (error) {
       console.error("Error al calificar la tarea", error);
+      setSnackbarMessage("Error al guardar la calificación");
+      setSnackbarOpen(true);
     }
   };
 
-  // Filtro por nombre del alumno y estado
-  const tareasFiltradas = tareas
-    .filter((tarea) =>
-      tarea.alumno.toLowerCase().includes(busquedaAlumno.toLowerCase()) &&
+  const tareasFiltradas = tareas.filter(
+    (tarea) =>
+      tarea.NombredelAlumno.toLowerCase().includes(
+        busquedaAlumno.toLowerCase()
+      ) &&
       (filtroEstado === "" || tarea.estado === filtroEstado)
-    );
+  );
 
-  // Paginación de las tareas
   const inicioPagina = (paginaActual - 1) * tareasPorPagina;
-  const tareasPaginadas = tareasFiltradas.slice(inicioPagina, inicioPagina + tareasPorPagina);
+
+  const tareasPaginadas = tareasFiltradas.slice(
+    inicioPagina,
+    inicioPagina + tareasPorPagina
+  );
   const totalPaginas = Math.ceil(tareasFiltradas.length / tareasPorPagina);
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
 
   return (
     <>
       <Navbar />
-
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      >
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            {actividad.titulo}
+          </Typography>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            {/* Filtros y navegación arriba */}
             <Grid container spacing={2}>
-              {/* Filtro por estado */}
               <Grid item xs={12} md={3}>
                 <TextField
                   select
@@ -120,11 +162,9 @@ const Page = () => {
                 >
                   <MenuItem value="">Todos</MenuItem>
                   <MenuItem value="Pendiente">Pendiente</MenuItem>
-                  <MenuItem value="Completada">Completada</MenuItem>
+                  <MenuItem value="Revisado">Revisado</MenuItem>
                 </TextField>
               </Grid>
-
-              {/* Filtro por nombre del alumno */}
               <Grid item xs={12} md={4}>
                 <TextField
                   label="Buscar alumno"
@@ -134,14 +174,12 @@ const Page = () => {
                   onChange={(e) => setBusquedaAlumno(e.target.value)}
                 />
               </Grid>
-
-              {/* Botón de búsqueda */}
               <Grid item xs={12} md={2}>
                 <Button
                   variant="contained"
                   color="primary"
                   fullWidth
-                  sx={{ height: '100%' }}
+                  sx={{ height: "100%" }}
                   onClick={() => setPaginaActual(1)}
                 >
                   Buscar
@@ -151,103 +189,167 @@ const Page = () => {
           </Paper>
         </Container>
 
-        {/* Panel para calificar y retroalimentar */}
-        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <div className="px-75" style={{ flexGrow: 1 }}>
-              <Grid container spacing={2}>
-                {/* Panel derecho para calificación y retroalimentación */}
-                <Grid item xs={12} md={4}>
-                  <Card>
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                        Asignar calificación
-                      </Typography>
-                      <TextField
-                        label="Calificación"
-                        variant="outlined"
-                        type="number"
-                        fullWidth
-                        inputProps={{ min: 1, max: 10 }}
-                        value={calificacion}
-                        onChange={(e) => setCalificacion(e.target.value)}
-                      />
-                      <TextField
-                        label="Retroalimentación"
-                        variant="outlined"
-                        fullWidth
-                        multiline
-                        rows={4}
-                        value={retroalimentacion}
-                        onChange={(e) => setRetroalimentacion(e.target.value)}
-                      />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ mt: 2 }}
-                        onClick={() => manejarCalificacion(selectedTareaId)} // Aquí pasarías el ID de la tarea seleccionada
-                      >
-                        Calificar
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              </Grid>
-            </div>
-          </Paper>
-        </Container>
-
-        {/* Mostrar las tareas de los alumnos */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
               Tareas de los Alumnos
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box sx={{ padding: 2 }}>
-                  {tareasPaginadas.length > 0 ? (
-                    tareasPaginadas.map((tarea, index) => (
-                      <Accordion key={index}>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls={`panel${index}-content`}
-                          id={`panel${index}-header`}
+            <Box sx={{ padding: 2 }}>
+              {tareasPaginadas.length > 0 ? (
+                tareasPaginadas.map((tarea, index) => (
+                  <Accordion key={tarea._id}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls={`panel${index}-content`}
+                      id={`panel${index}-header`}
+                    >
+                      <Typography>{tarea.NombredelAlumno}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <div className="grid grid-cols-2 gap-10">
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            flexGrow: 1,
+                          }}
                         >
-                          <Typography>{tarea.titulo}</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <Typography>{tarea.descripcion}</Typography>
-                          <Button size="small" sx={{ marginTop: 1 }} onClick={() => setSelectedTareaId(tarea._id)}>
-                            Calificar
-                          </Button>
-                        </AccordionDetails>
-                      </Accordion>
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No hay tareas que mostrar.
-                    </Typography>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
+                          <Typography variant="h6">
+                            Detalles de la Tarea
+                          </Typography>
+                          <br />
+                          <Typography>
+                            Nombre de la actividad: {actividad.titulo}
+                          </Typography>
+                          <Typography>
+                            Instrucciones de la actividad:
+                          </Typography>
+                          <Typography>{actividad.descripcion}</Typography>
+                          <Typography>
+                            Fecha de entrega: {tarea.fechaSubida}
+                          </Typography>
+                          <br />
+                          <Typography>Archivo:{tarea.archivo}</Typography>
+                          <Typography variant="body2">
+                            {tarea.archivo && (
+                              <a
+                                href={`${API_URL_PA_IMAGENES}${tarea.archivo}`}
+                                target="_blank"
+                                text align-self-center
+                                rel="noopener noreferrer"
+                              >
+                                <img
+                                  src="/fileImg.png"
+                                  alt="Archivo"
+                                  width={50}
+                                />
+                              </a>
+                            )}
+                          </Typography>
+                        </Box>
 
-            {/* Paginación */}
-            {totalPaginas > 1 && (
-              <Pagination
-                count={totalPaginas}
-                page={paginaActual}
-                onChange={(e, value) => setPaginaActual(value)}
-                sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
-              />
-            )}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            flexGrow: 1,
+                          }}
+                        >
+                          <Typography variant="h6">Calificar Tarea</Typography>
+                          <TextField
+                            label="Calificación"
+                            variant="outlined"
+                            type="number"
+                            fullWidth
+                            inputProps={{ min: 0, max: 10 }}
+                            value={
+                              calificacionTemp[tarea._id] !== undefined
+                                ? calificacionTemp[tarea._id]
+                                : tarea.calificacion
+                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setCalificacionTemp((prev) => ({
+                                ...prev,
+                                [tarea._id]: value,
+                              }));
+                            }}
+                          />
+                          <br />
+                          <TextField
+                            label="Retroalimentación"
+                            variant="outlined"
+                            fullWidth
+                            multiline
+                            rows={4}
+                            value={
+                              retroalimentacionTemp[tarea._id] !== undefined
+                                ? retroalimentacionTemp[tarea._id]
+                                : tarea.retroalimentacion
+                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setRetroalimentacionTemp((prev) => ({
+                                ...prev,
+                                [tarea._id]: value,
+                              }));
+                            }}
+                          />
+                          <br />
+                          <TextField
+                            label="Estado"
+                            variant="outlined"
+                            disabled
+                            fullWidth
+                            value={
+                              estadoTemp[tarea._id] !== undefined
+                                ? estadoTemp[tarea._id]
+                                : tarea.estado
+                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setEstadoTemp((prev) => ({
+                                ...prev,
+                                [tarea._id]: value,
+                              }));
+                            }}
+                          />
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => manejarCalificacion(tarea._id)}
+                            sx={{ mt: 2 }}
+                          >
+                            Guardar Calificación
+                          </Button>
+                        </Box>
+                      </div>
+                    </AccordionDetails>
+                  </Accordion>
+                ))
+              ) : (
+                <Typography>No hay tareas disponibles.</Typography>
+              )}
+            </Box>
           </Paper>
         </Container>
 
-        <Footer />
+        <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+          <Pagination
+            count={totalPaginas}
+            page={paginaActual}
+            onChange={(event, value) => setPaginaActual(value)}
+            color="primary"
+          />
+        </Box>
       </Box>
+      <Footer />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+      />
     </>
   );
 };

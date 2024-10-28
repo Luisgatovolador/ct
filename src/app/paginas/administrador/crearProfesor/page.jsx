@@ -33,7 +33,7 @@ const Page = () => {
   const [roles, setRoles] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
-  const profesoresPorPagina = 5;
+  const profesoresPorPagina = 4;
 
   const [nuevoProfesor, setNuevoProfesor] = useState({
     nombre: "",
