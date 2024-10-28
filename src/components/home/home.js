@@ -15,9 +15,14 @@ export default function HomeStandard() {
       <div className="px-44">
         <ImageCarousel />
 
-        <Grid container spacing={4} className="mt-12">
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%' }}>
+        {/* Título antes de las tarjetas */}
+        <Typography variant="h3" component="h2" gutterBottom className="mt-12" align="center">
+        CONÓCENOS
+        </Typography>
+
+        <Grid container spacing={4} className="mt-6" >
+          <Grid item xs={12} md={4} sx={{marginLeft: '-7%', marginRight: "3%"}}>
+            <Card sx={{ height: '100%', backgroundColor:"#bfdae2"}}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Misión
@@ -32,8 +37,8 @@ export default function HomeStandard() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%' }}>
+          <Grid item xs={12} md={4}  sx={{marginRight:'3%'}}>
+            <Card sx={{ height: '100%' , backgroundColor:"#bfdae2"}}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Visión
@@ -48,8 +53,8 @@ export default function HomeStandard() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%' }}>
+          <Grid item xs={12} md={4} sx={{marginRight:'1%'}}>
+            <Card sx={{ height: '100%', backgroundColor:"#bfdae2" }}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Valores
