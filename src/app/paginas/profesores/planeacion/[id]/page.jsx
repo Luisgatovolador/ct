@@ -22,8 +22,8 @@ import { useParams } from "next/navigation";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DescriptionIcon from "@mui/icons-material/Description";
 
-const API_URL =
-  "https://control-de-tareas-backend-production.up.railway.app/api";
+const API_URL ="https://control-de-tareas-backend-production.up.railway.app/api";
+const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production.up.railway.app/uploads/";
 
 function Page() {
   const [planeacion, setPlaneacion] = useState(null);
@@ -275,8 +275,22 @@ function Page() {
                             marginBottom: 1,
                           }}
                         >
+                          <Typography
+                          variant="body1"
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 1,
+                          }}
+                        >
                           <DescriptionIcon sx={{ marginRight: 1 }} />
-                          Archivo: {actividad.archivo}
+                          Archivo : {actividad.descripcion}
+                        </Typography>
+                          {actividad.archivo && (
+                              <a href={`${API_URL_PA_IMAGENES}${actividad.archivo}`} target="_blank" rel="noopener noreferrer">
+                                <img src="/fileImg.png" alt="Archivo" width={50} />
+                              </a>
+                            )}
                           
                         </Typography>
                         

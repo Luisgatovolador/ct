@@ -12,6 +12,7 @@ export default function HomeStandard() {
   return (
     <>
     <script src="//code.tidio.co/9fhtfgifxdbqzldzttuatuy1oa4f4gwz.js" async></script>
+    
       <div className="px-44">
         <ImageCarousel />
 
