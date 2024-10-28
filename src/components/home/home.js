@@ -12,10 +12,12 @@ export default function HomeStandard() {
   return (
     <>
     <script src="//code.tidio.co/9fhtfgifxdbqzldzttuatuy1oa4f4gwz.js" async></script>
+    
       <div className="px-44">
         <ImageCarousel />
 
         <Grid container spacing={4} className="mt-12">
+          
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}>
               <CardContent>

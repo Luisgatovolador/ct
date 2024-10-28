@@ -106,8 +106,13 @@ const Page = () => {
   );
   const totalPaginas = Math.ceil(alumnosFiltrados.length / alumnosPorPagina);
 
-  // Agregar o actualizar un alumno en la base de datos
   const manejarAgregarAlumno = async () => {
+    // Validación simple
+    if (!nuevoAlumno.nombre || !nuevoAlumno.email || !nuevoAlumno.rol || !nuevoAlumno.password) {
+      alert("Por favor, completa todos los campos requeridos.");
+      return;
+    }
+  
     try {
       if (modoEdicion) {
         // Actualizar alumno
@@ -121,7 +126,7 @@ const Page = () => {
             body: JSON.stringify(nuevoAlumno),
           }
         );
-
+  
         if (response.ok) {
           const updatedAlumno = await response.json();
           setAlumnos(
@@ -144,13 +149,13 @@ const Page = () => {
             body: JSON.stringify(nuevoAlumno),
           }
         );
-
+  
         if (response.ok) {
           const nuevoAlumnoResponse = await response.json();
           setAlumnos([...alumnos, nuevoAlumnoResponse]);
         }
       }
-
+  
       setNuevoAlumno({
         nombre: "",
         email: "",
@@ -162,7 +167,7 @@ const Page = () => {
       console.error("Error al agregar o actualizar el alumno:", error);
     }
   };
-
+  
   // Eliminar un alumno de la base de datos
   const manejarEliminarAlumno = async (id) => {
     try {
