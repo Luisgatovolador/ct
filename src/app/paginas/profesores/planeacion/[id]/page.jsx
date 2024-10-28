@@ -123,10 +123,20 @@ function Page() {
       const resultado = await response.json();
       setActividades([...actividades, resultado]);
       setModalAbierto(false);
+
+      
+
+
     } catch (error) {
       console.error("Error al agregar la actividad:", error);
     }
   };
+
+
+
+
+
+
 
   // Función para editar una actividad seleccionada
   const manejarEditarActividad = (actividad) => {
@@ -284,7 +294,7 @@ function Page() {
                           }}
                         >
                           <DescriptionIcon sx={{ marginRight: 1 }} />
-                          Archivo : {actividad.descripcion}
+                          Archivo : {actividad.archivo}
                         </Typography>
                           {actividad.archivo && (
                               <a href={`${API_URL_PA_IMAGENES}${actividad.archivo}`} target="_blank" rel="noopener noreferrer">
