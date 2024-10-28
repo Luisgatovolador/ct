@@ -17,6 +17,7 @@ import Plot from "react-plotly.js";
 import { getUser } from "@/services/auth";
 
 const API_URL = "https://control-de-tareas-backend-production.up.railway.app/api";
+const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production.up.railway.app/";
 
 function Page() {
   const [user, setUser] = useState(null);
@@ -26,6 +27,7 @@ function Page() {
   const [planeacion, setPlaneacion] = useState([]);
   const [tareasEnviadas, setTareasEnviadas] = useState([]);
   const [selectedActividad, setSelectedActividad] = useState(null);
+  const [selectedTarea, setSelectedTarea] = useState(null);
   const [archivo, setArchivo] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [tareaEnviada, setTareaEnviada] = useState(false);
@@ -66,13 +68,16 @@ function Page() {
   };
 
   const openModal = (actividad) => {
+    const tarea = tareasEnviadas.find((tarea) => tarea.actividad === actividad._id);
     setSelectedActividad(actividad);
-    setTareaEnviada(tareasEnviadas.some((tarea) => tarea.actividad === actividad._id));
+    setSelectedTarea(tarea || null);
+    setTareaEnviada(Boolean(tarea));
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setSelectedActividad(null);
+    setSelectedTarea(null);
     setArchivo(null);
     setModalOpen(false);
   };
@@ -95,7 +100,6 @@ function Page() {
       });
       const tareaData = await response.json();
 
-      // Actualizar la actividad con el ID de la tarea entregada
       await fetch(`${API_URL}/actividad/${selectedActividad._id}`, {
         method: "PATCH",
         headers: {
@@ -106,7 +110,8 @@ function Page() {
         }),
       });
 
-      setTareaEnviada(true); // Marcar la tarea como enviada
+      setTareaEnviada(true);
+      setSelectedTarea(tareaData);
       closeModal();
     } catch (error) {
       console.error("Error submitting task:", error);
@@ -118,12 +123,10 @@ function Page() {
       (p) => p.asignatura === asignatura._id
     );
 
-    // Filtrar actividades de acuerdo a las planeaciones asociadas a la asignatura
     const actividadesAsignatura = actividades.filter((actividad) =>
       planeacionesAsignatura.some((p) => p._id === actividad.planeacionID)
     );
 
-    // Filtrar actividades pendientes y entregadas
     const actividadesPendientes = actividadesAsignatura.filter(
       (actividad) =>
         !tareasEnviadas.some((tarea) => tarea.actividad === actividad._id) &&
@@ -152,7 +155,6 @@ function Page() {
             </Typography>
             {asignaturasAlumno.length > 0 ? (
               asignaturasAlumno.map((asignatura) => {
-                // Calcular el porcentaje de avance
                 const totalActividades =
                   asignatura.actividadesPendientes.length + asignatura.actividadesEntregadas.length;
                 const avance = (asignatura.actividadesEntregadas.length / totalActividades) * 100;
@@ -165,7 +167,6 @@ function Page() {
                     <AccordionDetails>
                       <Typography>{asignatura.descripcion}</Typography>
 
-                      {/* Gráfico de avance */}
                       <Plot
                         data={[
                           {
@@ -206,7 +207,7 @@ function Page() {
                           asignatura.actividadesEntregadas.map((actividad) => (
                             <Box key={actividad._id} mb={2}>
                               <Typography>{actividad.titulo} (Entregada)</Typography>
-                              <Button variant="outlined" disabled>
+                              <Button variant="outlined" onClick={() => openModal(actividad)}>
                                 Ver Detalles
                               </Button>
                             </Box>
@@ -227,7 +228,6 @@ function Page() {
         <Footer />
       </Box>
 
-      {/* Modal para ver detalles de actividad y cargar archivo */}
       <Modal open={modalOpen} onClose={closeModal}>
         <Box sx={{ padding: 4, backgroundColor: "white", maxWidth: 600, margin: "auto", mt: 10 }}>
           {selectedActividad && (
@@ -236,11 +236,27 @@ function Page() {
               <Typography>{selectedActividad.descripcion}</Typography>
               <Typography>Fecha de entrega: {new Date(selectedActividad.fechaFin).toLocaleDateString()}</Typography>
 
-              {!tareaEnviada && (
+              {tareaEnviada ? (
                 <>
+                  <Typography variant="h6">Detalles de la Tarea:</Typography>
+                  <Typography>Calificación: {selectedTarea.calificacion}</Typography>
+                  <Typography>
+                    Retroalimentación:{" "}
+                    {selectedTarea.retroalimentacion?.trim() || "Sin retroalimentación"}
+                  </Typography>
+                  {selectedTarea.archivo && (
+                    <a href={`${API_URL_PA_IMAGENES}${selectedTarea.archivo}`} target="_blank" rel="noopener noreferrer">
+                      Ver tarea
+                      <img src="/fileImg.png" alt="Archivo" width={50} />
+                    </a>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Typography variant="h6">Subir Tarea:</Typography>
                   <input type="file" onChange={handleFileChange} />
                   <Button variant="contained" onClick={handleSubmit} disabled={tareaEnviada}>
-                    Entregar Tarea
+                    Enviar Tarea
                   </Button>
                 </>
               )}
