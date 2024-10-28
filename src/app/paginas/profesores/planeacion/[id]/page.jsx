@@ -25,7 +25,6 @@ import DescriptionIcon from "@mui/icons-material/Description";
 const API_URL =
   "https://control-de-tareas-backend-production.up.railway.app/api";
 
-
 function Page() {
   const [planeacion, setPlaneacion] = useState(null);
   const [actividades, setActividades] = useState([]);
@@ -36,7 +35,7 @@ function Page() {
     titulo: "",
     descripcion: "",
     fechaInicio: "",
-    archivo: "",
+    archivo: null,
     fechaFin: "",
     planeacionID: id,
   });
@@ -82,7 +81,7 @@ function Page() {
     obtenerPlaneacion();
   }, [id]);
 
-  // actividades de la planeación
+  // Actividades de la planeación
   useEffect(() => {
     const obtenerActividades = async () => {
       try {
@@ -103,15 +102,22 @@ function Page() {
 
   // Función para agregar nueva actividad
   const manejarAgregarActividad = async () => {
+    const formData = new FormData();
+    formData.append("titulo", nuevaActividad.titulo);
+    formData.append("descripcion", nuevaActividad.descripcion);
+    formData.append("fechaInicio", nuevaActividad.fechaInicio);
+    formData.append("fechaFin", nuevaActividad.fechaFin);
+    formData.append("planeacionID", nuevaActividad.planeacionID);
+    if (nuevaActividad.archivo) {
+      formData.append("archivo", nuevaActividad.archivo);
+    }
+
     try {
       const response = await fetch(
         `${API_URL}/actividad/`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(nuevaActividad),
+          body: formData,
         }
       );
       const resultado = await response.json();
@@ -128,18 +134,21 @@ function Page() {
     setModalAbierto(true);
   };
 
-  // actualizar la actividad seleccionada
+  // Actualizar la actividad seleccionada
   const manejarActualizarActividad = async () => {
     if (actividadSeleccionada) {
+      const formData = new FormData();
+      formData.append("titulo", actividadSeleccionada.titulo);
+      formData.append("descripcion", actividadSeleccionada.descripcion);
+      formData.append("fechaInicio", actividadSeleccionada.fechaInicio);
+      formData.append("fechaFin", actividadSeleccionada.fechaFin);
+
       try {
         const response = await fetch(
-         `${API_URL}/actividad/${actividadSeleccionada._id}`,
+          `${API_URL}/actividad/${actividadSeleccionada._id}`,
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(actividadSeleccionada),
+            body: formData,
           }
         );
         const resultado = await response.json();
@@ -187,6 +196,7 @@ function Page() {
             <Typography variant="h6" component="h3">
               {planeacion ? planeacion.nombre : "Cargando planeación..."}
             </Typography>
+           
           </Paper>
           <br />
 
@@ -257,6 +267,19 @@ function Page() {
                           <DescriptionIcon sx={{ marginRight: 1 }} />
                           Descripción: {actividad.descripcion}
                         </Typography>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 1,
+                          }}
+                        >
+                          <DescriptionIcon sx={{ marginRight: 1 }} />
+                          Archivo: {actividad.archivo}
+                          
+                        </Typography>
+                        
                         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                           <Link href={`/paginas/profesores/actividad/${actividad._id}`}>
                             <Button
@@ -289,157 +312,153 @@ function Page() {
                     padding: 2,
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "stretch",
-                    justifyContent: "flex-start",
+                    
                     height: "100%",
                   }}
                 >
-                  <Typography variant="h5" component="h2" gutterBottom>
-                    Gestión de Actividades 
+                  <Typography variant="h5" gutterBottom>
+                    Agregar Nueva Actividad
                   </Typography>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={() => setModalAbierto(true)}
-                    sx={{ marginBottom: 2, width: "100%" }}
                   >
                     Agregar Actividad
                   </Button>
+
                   <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setModalPlaneacionAbierto(true)}
-                    sx={{ width: "100%" }}
-                  >
-                    Editar Planeación
-                  </Button>
+              variant="outlined"
+              color="primary"
+              onClick={() => setModalPlaneacionAbierto(true)}
+              sx={{ marginTop: 2 }}
+            >
+              Modificar Planeación
+            </Button>
                 </Paper>
               </Grid>
             </Grid>
           </Paper>
         </div>
-
-        {/* Modal para agregar o editar actividad */}
-        <Modal
-          open={modalAbierto}
-          onClose={() => setModalAbierto(false)}
-        >
-          <Box sx={estiloModal}>
-            <Typography variant="h6" component="h2">
-              {actividadSeleccionada ? "Editar Actividad" : "Agregar Actividad"}
-            </Typography>
-            <TextField
-              label="Título"
-              value={actividadSeleccionada ? actividadSeleccionada.titulo : nuevaActividad.titulo}
-              onChange={(e) => {
-                const valor = e.target.value;
-                if (actividadSeleccionada) {
-                  setActividadSeleccionada({ ...actividadSeleccionada, titulo: valor });
-                } else {
-                  setNuevaActividad({ ...nuevaActividad, titulo: valor });
-                }
-              }}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Descripción"
-              value={actividadSeleccionada ? actividadSeleccionada.descripcion : nuevaActividad.descripcion}
-              onChange={(e) => {
-                const valor = e.target.value;
-                if (actividadSeleccionada) {
-                  setActividadSeleccionada({ ...actividadSeleccionada, descripcion: valor });
-                } else {
-                  setNuevaActividad({ ...nuevaActividad, descripcion: valor });
-                }
-              }}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              type="date"
-              label="Fecha de Inicio"
-              value={actividadSeleccionada ? actividadSeleccionada.fechaInicio.split("T")[0] : nuevaActividad.fechaInicio}
-              onChange={(e) => {
-                const valor = e.target.value;
-                if (actividadSeleccionada) {
-                  setActividadSeleccionada({ ...actividadSeleccionada, fechaInicio: valor });
-                } else {
-                  setNuevaActividad({ ...nuevaActividad, fechaInicio: valor });
-                }
-              }}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              type="date"
-              label="Fecha de Entrega"
-              value={actividadSeleccionada ? actividadSeleccionada.fechaFin.split("T")[0] : nuevaActividad.fechaFin}
-              onChange={(e) => {
-                const valor = e.target.value;
-                if (actividadSeleccionada) {
-                  setActividadSeleccionada({ ...actividadSeleccionada, fechaFin: valor });
-                } else {
-                  setNuevaActividad({ ...nuevaActividad, fechaFin: valor });
-                }
-              }}
-              fullWidth
-              margin="normal"
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={actividadSeleccionada ? manejarActualizarActividad : manejarAgregarActividad}
-              sx={{ marginTop: 2 }}
-            >
-              {actividadSeleccionada ? "Actualizar" : "Agregar"}
-            </Button>
-          </Box>
-        </Modal>
-
-        {/* Modal para editar planeación */}
-        <Modal
-          open={modalPlaneacionAbierto}
-          onClose={() => setModalPlaneacionAbierto(false)}
-        >
-          <Box sx={estiloModal}>
-            <Typography variant="h6" component="h2">
-              Editar Planeación
-            </Typography>
-            <TextField
-              label="Nombre"
-              value={editarPlaneacion.nombre}
-              onChange={(e) => setEditarPlaneacion({ ...editarPlaneacion, nombre: e.target.value })}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              type="date"
-              label="Fecha de Comienzo"
-              value={editarPlaneacion.fechaComienzo}
-              onChange={(e) => setEditarPlaneacion({ ...editarPlaneacion, fechaComienzo: e.target.value })}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              type="date"
-              label="Fecha de Fin"
-              value={editarPlaneacion.fechaFin}
-              onChange={(e) => setEditarPlaneacion({ ...editarPlaneacion, fechaFin: e.target.value })}
-              fullWidth
-              margin="normal"
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={manejarActualizarPlaneacion}
-              sx={{ marginTop: 2 }}
-            >
-              Actualizar Planeación
-            </Button>
-          </Box>
-        </Modal>
       </Box>
+
+      {/* Modal para agregar o editar actividad */}
+      <Modal open={modalAbierto} onClose={() => setModalAbierto(false)}>
+        <Box sx={estiloModal}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            {actividadSeleccionada ? "Editar Actividad" : "Agregar Actividad"}
+          </Typography>
+          <TextField
+            label="Título"
+            variant="outlined"
+            fullWidth
+            value={actividadSeleccionada ? actividadSeleccionada.titulo : nuevaActividad.titulo}
+            onChange={(e) =>
+              actividadSeleccionada
+                ? setActividadSeleccionada({ ...actividadSeleccionada, titulo: e.target.value })
+                : setNuevaActividad({ ...nuevaActividad, titulo: e.target.value })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+          <TextField
+            label="Descripción"
+            variant="outlined"
+            fullWidth
+            value={actividadSeleccionada ? actividadSeleccionada.descripcion : nuevaActividad.descripcion}
+            onChange={(e) =>
+              actividadSeleccionada
+                ? setActividadSeleccionada({ ...actividadSeleccionada, descripcion: e.target.value })
+                : setNuevaActividad({ ...nuevaActividad, descripcion: e.target.value })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+          <InputLabel htmlFor="fechaInicio">Fecha de Inicio</InputLabel>
+          <TextField
+            type="date"
+            variant="outlined"
+            fullWidth
+            value={actividadSeleccionada ? actividadSeleccionada.fechaInicio.split("T")[0] : nuevaActividad.fechaInicio}
+            onChange={(e) =>
+              actividadSeleccionada
+                ? setActividadSeleccionada({ ...actividadSeleccionada, fechaInicio: e.target.value })
+                : setNuevaActividad({ ...nuevaActividad, fechaInicio: e.target.value })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+          <InputLabel htmlFor="fechaFin">Fecha de Entrega</InputLabel>
+          <TextField
+            type="date"
+            variant="outlined"
+            fullWidth
+            value={actividadSeleccionada ? actividadSeleccionada.fechaFin.split("T")[0] : nuevaActividad.fechaFin}
+            onChange={(e) =>
+              actividadSeleccionada
+                ? setActividadSeleccionada({ ...actividadSeleccionada, fechaFin: e.target.value })
+                : setNuevaActividad({ ...nuevaActividad, fechaFin: e.target.value })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+          <InputLabel htmlFor="archivo">Archivo</InputLabel>
+          <input
+            type="file"
+            onChange={(e) =>
+              actividadSeleccionada
+                ? setActividadSeleccionada({ ...actividadSeleccionada, archivo: e.target.files[0] })
+                : setNuevaActividad({ ...nuevaActividad, archivo: e.target.files[0] })
+            }
+            style={{ marginBottom: 16 }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={actividadSeleccionada ? manejarActualizarActividad : manejarAgregarActividad}
+          >
+            {actividadSeleccionada ? "Actualizar" : "Agregar"}
+          </Button>
+        </Box>
+      </Modal>
+
+      {/* Modal para editar planeación */}
+      <Modal open={modalPlaneacionAbierto} onClose={() => setModalPlaneacionAbierto(false)}>
+        <Box sx={estiloModal}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Editar Planeación
+          </Typography>
+          <TextField
+            label="Nombre"
+            variant="outlined"
+            fullWidth
+            value={editarPlaneacion.nombre}
+            onChange={(e) => setEditarPlaneacion({ ...editarPlaneacion, nombre: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <InputLabel htmlFor="fechaComienzo">Fecha de Comienzo</InputLabel>
+          <TextField
+            type="date"
+            variant="outlined"
+            fullWidth
+            value={editarPlaneacion.fechaComienzo}
+            onChange={(e) => setEditarPlaneacion({ ...editarPlaneacion, fechaComienzo: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <InputLabel htmlFor="fechaFin">Fecha de Fin</InputLabel>
+          <TextField
+            type="date"
+            variant="outlined"
+            fullWidth
+            value={editarPlaneacion.fechaFin}
+            onChange={(e) => setEditarPlaneacion({ ...editarPlaneacion, fechaFin: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={manejarActualizarPlaneacion}
+          >
+            Actualizar Planeación
+          </Button>
+        </Box>
+      </Modal>
       <Footer />
     </>
   );

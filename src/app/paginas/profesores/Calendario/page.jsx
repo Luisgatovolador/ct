@@ -1,15 +1,26 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { es } from "date-fns/locale";
-import { Container, Typography, Grid, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import { getUser } from "@/services/auth";
 
-const API_URL = "https://control-de-tareas-backend-production.up.railway.app/api";
+const API_URL =
+  "https://control-de-tareas-backend-production.up.railway.app/api";
 
 // calendario en español
 const locales = {
@@ -19,7 +30,7 @@ const locales = {
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), 
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
   getDay,
   locales,
 });
@@ -32,84 +43,106 @@ const CustomEvent = ({ event }) => {
   );
 };
 
-const CustomDateCellWrapper = ({ children, value }) => (
-  <div style={{ height: 'auto' }}>
-    {children}
-  </div>
+const CustomDateCellWrapper = ({ children }) => (
+  <div style={{ height: "auto" }}>{children}</div>
 );
 
 const Page = () => {
   const [actividades, setActividades] = useState([]);
-  const [busquedaPlaneacionID, setBusquedaPlaneacionID] = useState("");
   const [usuario, setUsuario] = useState(null);
-  const [planeacionesAsignaturas, setPlaneacionesAsignaturas] = useState([]);
   const [eventos, setEventos] = useState([]);
+  const [nuevaActividad, setNuevaActividad] = useState({
+    titulo: "",
+    descripcion: "",
+    fechaInicio: "",
+    fechaFin: "",
+    profesorID: "", // Inicialmente vacío
+  });
+
+  const [open, setOpen] = useState(false); // Estado para manejar el modal
 
   useEffect(() => {
     const fetchedUser = getUser();
     if (fetchedUser) {
       setUsuario(fetchedUser);
       fetchData(fetchedUser.id);
+      setNuevaActividad((prev) => ({ ...prev, profesorID: fetchedUser.id })); // Establecer el ID del profesor aquí
     }
   }, []);
 
-  // Obtener actividades y planeaciones y asignaturas
+  // Obtener actividades filtradas por el ID del profesor
   const fetchData = async (userId) => {
     try {
       const alumnoResponse = await fetch(`${API_URL}/profesor/${userId}`);
-      const dataAlumno = await alumnoResponse.json();
+      const dataProfesor = await alumnoResponse.json();
 
       const actividadesResponse = await fetch(`${API_URL}/actividad`);
       const dataActividad = await actividadesResponse.json();
 
-      if (dataAlumno.planeacionID && dataActividad.length > 0) {
-        const filtroActividadesAlumno = dataActividad.filter((actividad) =>
-          dataAlumno.planeacionID.includes(actividad.planeacionID)
-        );
-        setActividades(filtroActividadesAlumno);
-      }
-
-      const planeacionesResponse = await fetch(`${API_URL}/planeacion`);
-      const dataPlaneaciones = await planeacionesResponse.json();
-
-      // Asociar el nombre de la asignatura a cada planeación
-      const planeacionesConAsignatura = await Promise.all(
-        dataPlaneaciones.map(async (planeacion) => {
-          const asignaturaResponse = await fetch(`${API_URL}/asignatura/${planeacion.asignatura}`);
-          const dataAsignatura = await asignaturaResponse.json();
-          return {
-            ...planeacion,
-            nombreAsignatura: dataAsignatura.nombre, 
-          };
-        })
+      const actividadesFiltradas = dataActividad.filter(
+        (actividad) => actividad.planeacionID === userId
       );
-
-      const planeacionesFiltradas = planeacionesConAsignatura.filter((planeacion) =>
-        dataAlumno.planeacionID.includes(planeacion._id)
-      );
-
-      setPlaneacionesAsignaturas(planeacionesFiltradas); 
-      
+      setActividades(actividadesFiltradas);
     } catch (error) {
-      console.error("Error al cargar las actividades o planeaciones:", error);
+      console.error("Error al cargar las actividades:", error);
     }
   };
 
-  // Filtro para mostrar actividades
-  useEffect(() => {
-    const actividadesFiltradas = actividades.filter(
-      (actividad) => busquedaPlaneacionID === "" || actividad.planeacionID === busquedaPlaneacionID
-    );
+  // Manejar la creación de una nueva actividad
+  const manejarAgregarActividad = async () => {
+    const nuevaActividadData = {
+      titulo: nuevaActividad.titulo,
+      descripcion: nuevaActividad.descripcion,
+      fechaInicio: nuevaActividad.fechaInicio,
+      fechaFin: nuevaActividad.fechaFin,
+      planeacionID: nuevaActividad.profesorID,
+    };
 
+    try {
+      await fetch(`${API_URL}/actividad`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(nuevaActividadData),
+      });
+      // Volver a cargar actividades después de agregar una nueva
+      fetchData(nuevaActividad.profesorID);
+      // Limpiar el formulario
+      setNuevaActividad({
+        titulo: "",
+        descripcion: "",
+        fechaInicio: "",
+        fechaFin: "",
+        profesorID: nuevaActividad.profesorID,
+      });
+      handleClose(); // Cerrar el modal después de agregar
+    } catch (error) {
+      console.error("Error al agregar actividad:", error);
+    }
+  };
+
+  // Filtro para mostrar actividades en el calendario
+  useEffect(() => {
     setEventos(
-      actividadesFiltradas.map((actividad) => ({
+      actividades.map((actividad) => ({
         title: actividad.titulo,
         start: new Date(actividad.fechaInicio),
         end: new Date(actividad.fechaFin),
         allDay: true,
       }))
     );
-  }, [actividades, busquedaPlaneacionID]);
+  }, [actividades]);
+
+  // Manejar apertura del modal
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  // Manejar cierre del modal
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <>
@@ -120,32 +153,88 @@ const Page = () => {
           Calendario de Actividades
         </Typography>
 
-        <Grid item xs={12} md={4}>
-          <FormControl variant="outlined" fullWidth>
-            <InputLabel>Buscar por asignatura</InputLabel>
-            <Select
-              label="Buscar por asignatura"
-              value={busquedaPlaneacionID}
-              onChange={(e) => setBusquedaPlaneacionID(e.target.value)}
-            >
-              <MenuItem value="">
-                <em>Todos</em>
-              </MenuItem>
-              {planeacionesAsignaturas.map((planeacion) => (
-                <MenuItem key={planeacion._id} value={planeacion._id}>
-                  {planeacion.nombreAsignatura} 
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "16px",
+          }}
+        >
+          <Button variant="contained" color="primary" onClick={handleClickOpen}>
+            Agregar Actividad Personal
+          </Button>
+        </div>
+
+        {/* Modal para crear actividad */}
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Agregar Nueva Actividad</DialogTitle>
+          <DialogContent>
+            <TextField
+              label="Título"
+              variant="outlined"
+              fullWidth
+              value={nuevaActividad.titulo}
+              onChange={(e) =>
+                setNuevaActividad({ ...nuevaActividad, titulo: e.target.value })
+              }
+              sx={{ marginBottom: 2 }}
+            />
+            <TextField
+              label="Descripción"
+              variant="outlined"
+              fullWidth
+              value={nuevaActividad.descripcion}
+              onChange={(e) =>
+                setNuevaActividad({
+                  ...nuevaActividad,
+                  descripcion: e.target.value,
+                })
+              }
+              sx={{ marginBottom: 2 }}
+            />
+            <TextField
+              label="Fecha de Inicio"
+              type="date"
+              variant="outlined"
+              fullWidth
+              value={nuevaActividad.fechaInicio}
+              onChange={(e) =>
+                setNuevaActividad({
+                  ...nuevaActividad,
+                  fechaInicio: e.target.value,
+                })
+              }
+              sx={{ marginBottom: 2 }}
+            />
+            <TextField
+              label="Fecha de Entrega"
+              type="date"
+              variant="outlined"
+              fullWidth
+              value={nuevaActividad.fechaFin}
+              onChange={(e) =>
+                setNuevaActividad({
+                  ...nuevaActividad,
+                  fechaFin: e.target.value,
+                })
+              }
+              sx={{ marginBottom: 2 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button onClick={manejarAgregarActividad} color="primary">
+              Agregar
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Calendar
           localizer={localizer}
           events={eventos}
           startAccessor="start"
           endAccessor="end"
-          style={{ height: "auto", minHeight: "600px" }} 
+          style={{ height: "auto", minHeight: "600px" }}
           culture="es"
           views={["month", "week", "day", "agenda"]}
           step={60}
@@ -157,7 +246,7 @@ const Page = () => {
               dateCellWrapper: CustomDateCellWrapper,
             },
           }}
-          popup={false} 
+          popup={false}
           messages={{
             next: "Siguiente",
             previous: "Anterior",

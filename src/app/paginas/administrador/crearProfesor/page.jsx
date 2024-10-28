@@ -1,4 +1,4 @@
-'use client';  // Asegúrate de que está en el lado del cliente
+'use client'; // Asegúrate de que está en el lado del cliente
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -19,6 +19,8 @@ import {
   Select,
   Checkbox,
   ListItemText,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -45,6 +47,8 @@ const Page = () => {
 
   const [modoEdicion, setModoEdicion] = useState(false);
   const [profesorAEditar, setProfesorAEditar] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     const fetchProfesores = async () => {
@@ -92,7 +96,23 @@ const Page = () => {
   const profesoresPaginados = profesoresFiltrados.slice(inicioPagina, inicioPagina + profesoresPorPagina);
   const totalPaginas = Math.ceil(profesoresFiltrados.length / profesoresPorPagina);
 
+  const validarDatos = () => {
+    if (!nuevoProfesor.nombre || !nuevoProfesor.email || !nuevoProfesor.rol || !nuevoProfesor.password || !nuevoProfesor.confirmarPassword) {
+      setSnackbarMessage('Por favor completa todos los campos requeridos.');
+      setOpenSnackbar(true);
+      return false;
+    }
+    if (nuevoProfesor.password !== nuevoProfesor.confirmarPassword) {
+      setSnackbarMessage('Las contraseñas no coinciden.');
+      setOpenSnackbar(true);
+      return false;
+    }
+    return true;
+  };
+
   const manejarAgregarProfesor = async () => {
+    if (!validarDatos()) return; // Si hay errores de validación, no continuar
+
     try {
       if (modoEdicion && profesorAEditar) {
         const response = await fetch(
@@ -105,7 +125,6 @@ const Page = () => {
             body: JSON.stringify(nuevoProfesor),
           }
         );
-      
 
         if (response.ok) {
           const updatedProfesor = await response.json();
@@ -116,7 +135,7 @@ const Page = () => {
           );
           setModoEdicion(false);
           setProfesorAEditar(null);
-          window.location.reload()
+          window.location.reload();
         }
       } else {
         const response = await fetch(
@@ -129,7 +148,7 @@ const Page = () => {
             body: JSON.stringify(nuevoProfesor),
           }
         );
-        
+
         if (response.ok) {
           const nuevoProfesorResponse = await response.json();
           setProfesores([...profesores, nuevoProfesorResponse]);
@@ -145,7 +164,7 @@ const Page = () => {
         password: "",
         confirmarPassword: ""
       });
-      window.location.reload()
+      window.location.reload();
     } catch (error) {
       console.error('Error al agregar o actualizar el profesor:', error);
     }
@@ -162,7 +181,7 @@ const Page = () => {
 
       if (response.ok) {
         setProfesores(profesores.filter((profesor) => profesor.id !== id));
-        window.location.reload()
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error al eliminar el profesor:', error);
@@ -183,13 +202,15 @@ const Page = () => {
     });
   };
 
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
   return (
     <>
       <Navbar />
 
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-       
-
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
@@ -261,7 +282,6 @@ const Page = () => {
                   onChange={(e) => setNuevoProfesor({ ...nuevoProfesor, password: e.target.value })}
                 />
               </Grid>
-
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Confirmar Contraseña"
@@ -274,83 +294,40 @@ const Page = () => {
               </Grid>
 
               <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={manejarAgregarProfesor}
-                >
-                  {modoEdicion ? "Guardar Cambios" : "Agregar Profesor"}
+                <Button variant="contained" color="primary" onClick={manejarAgregarProfesor}>
+                  {modoEdicion ? "Actualizar" : "Agregar"}
                 </Button>
               </Grid>
             </Grid>
-          </Paper>
-        </Container>
 
-        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
-        
-          <Paper elevation={3} sx={{ padding: 2 }}>
-         
-            <Typography variant="h5" component="h3" gutterBottom>
-              Listado de Profesores
+            <Typography variant="h6" component="h4" gutterBottom sx={{ mt: 4 }}>
+              Lista de Profesores
             </Typography>
-           
+
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Buscar profesor por nombre"
-                  variant="outlined"
-                  fullWidth
-                  value={busquedaNombre}
-                  onChange={(e) => setBusquedaNombre(e.target.value)}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  sx={{ height: '100%' }}
-                  onClick={() => setBusquedaNombre("")}
-                >
-                  Limpiar 
-                </Button>
-              </Grid>
+              {profesoresPaginados.map((profesor) => (
+                <Grid item xs={12} md={6} key={profesor._id}>
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6">{profesor.nombre}</Typography>
+                      <Typography color="textSecondary">Correo electrónico: {profesor.email}</Typography>
+                      <Button
+                        color="primary"
+                        onClick={() => manejarEditarProfesor(profesor)}
+                      >
+                        <EditIcon />
+                      </Button>
+                      <IconButton
+                        color="primary"
+                        onClick={() => manejarEliminarProfesor(profesor._id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
             </Grid>
-       
-       <br />
-
-            <div className="grid grid-cols-2 gap-10">
-            {profesoresPaginados.map((profesor) => (
-              
-              <Card key={profesor.id} sx={{ mb: 2 }}>
-                <CardContent>
-                  <Typography variant="h6" component="h4">
-                    {profesor.nombre}
-                  </Typography>
-                  <Typography variant="body1" color="textSecondary">
-                    Email: {profesor.email}
-                  </Typography>
-                  <Typography variant="body1" color="textSecondary">
-                    Rol: {profesor.rol}
-                  </Typography>
-                  <Typography variant="body1" color="textSecondary">
-                    Asignaturas: {profesor.asignaturas.join(', ')}
-                  </Typography>
-                  <Box mt={2}>
-                    <IconButton color="primary" onClick={() => manejarEditarProfesor(profesor)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton color="secondary" onClick={() => manejarEliminarProfesor(profesor._id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-               
-              </Card>
-             
-            ))}
-             </div>
 
             <Pagination
               count={totalPaginas}
@@ -358,10 +335,14 @@ const Page = () => {
               onChange={(event, value) => setPaginaActual(value)}
               sx={{ mt: 2 }}
             />
-            
           </Paper>
-         
         </Container>
+
+        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+          <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
 
       <Footer />

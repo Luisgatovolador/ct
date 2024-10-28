@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Container, Grid, Card, CardContent, Typography, Button, TextField,
-  Paper, MenuItem, IconButton, Box, Pagination, FormControl, InputLabel, Select
+  Paper, MenuItem, IconButton, Box, Pagination, FormControl, InputLabel, Select, Snackbar, Alert
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +20,8 @@ const Page = () => {
   const [nuevoAsignatura, setNuevoAsignatura] = useState({ nombre: "", catedratico: [], estudiantes: [], area: "" });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [asignaturaAEditar, setAsignaturaAEditar] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   useEffect(() => {
     const fetchAreas = async () => {
@@ -62,6 +64,26 @@ const Page = () => {
 
   // Manejar agregar o actualizar asignatura
   const manejarAgregarAsignatura = async () => {
+    // Validaciones
+    if (!nuevoAsignatura.nombre.trim()) {
+      setSnackbarMessage("El nombre de la asignatura es obligatorio.");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    if (!nuevoAsignatura.area) {
+      setSnackbarMessage("Por favor, seleccione un área.");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    // Evitar asignaturas duplicadas
+    if (asignaturas.some(asignatura => asignatura.nombre.toLowerCase() === nuevoAsignatura.nombre.toLowerCase() && !modoEdicion)) {
+      setSnackbarMessage("Ya existe una asignatura con ese nombre.");
+      setOpenSnackbar(true);
+      return;
+    }
+
     try {
       if (modoEdicion) {
         const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/asignatura/${asignaturaAEditar._id}`, {
@@ -77,7 +99,6 @@ const Page = () => {
           setAsignaturas(asignaturas.map(asignatura => asignatura.id === updatedAsignatura.id ? updatedAsignatura : asignatura));
           setModoEdicion(false);
           setAsignaturaAEditar(null);
-          window.location.reload();
         }
       } else {
         // Crear nueva asignatura
@@ -92,7 +113,6 @@ const Page = () => {
         if (response.ok) {
           const nuevaAsignatura = await response.json();
           setAsignaturas([...asignaturas, nuevaAsignatura]);
-          window.location.reload();
         }
       }
 
@@ -111,7 +131,6 @@ const Page = () => {
 
       if (response.ok) {
         setAsignaturas(asignaturas.filter(asignatura => asignatura.id !== id));
-        window.location.reload();
       }
     } catch (error) {
       console.error('Error al eliminar la asignatura:', error);
@@ -123,6 +142,10 @@ const Page = () => {
     setModoEdicion(true);
     setAsignaturaAEditar(asignatura);
     setNuevoAsignatura({ nombre: asignatura.nombre, catedratico: asignatura.catedratico, estudiantes: asignatura.estudiantes, area: asignatura.area });
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -150,6 +173,8 @@ const Page = () => {
                     variant="outlined"
                     fullWidth
                     value={nuevoAsignatura.nombre}
+                    error={!nuevoAsignatura.nombre.trim() && modoEdicion}
+                    helperText={!nuevoAsignatura.nombre.trim() && modoEdicion ? "El nombre es requerido." : ""}
                     onChange={(e) => setNuevoAsignatura({ ...nuevoAsignatura, nombre: e.target.value })}
                   />
                 </Grid>
@@ -207,8 +232,11 @@ const Page = () => {
                     onChange={(e) => setFiltroArea(e.target.value)}
                   >
                     <MenuItem value="">Todas</MenuItem>
-                    <MenuItem value="Ciencias">Ciencias</MenuItem>
-                    <MenuItem value="Humanidades">Humanidades</MenuItem>
+                    {areas.map((area) => (
+                      <MenuItem key={area._id} value={area._id}>
+                        {area.nombre}
+                      </MenuItem>
+                    ))}
                   </TextField>
                 </Grid>
                 <Grid item xs={12} md={2}>
@@ -223,52 +251,49 @@ const Page = () => {
                   </Button>
                 </Grid>
               </Grid>
+
+              <Typography variant="h5" component="h3" gutterBottom>
+                Lista de Asignaturas
+              </Typography>
+              {asignaturasPaginadas.map((asignatura) => (
+                <Card key={asignatura._id} sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" component="h4">
+                      {asignatura.nombre}
+                    </Typography>
+                    <Typography color="textSecondary">Área: {asignatura.area}</Typography>
+                    <Button
+                      onClick={() => manejarEditarAsignatura(asignatura)}
+                      startIcon={<EditIcon />}
+                      variant="outlined"
+                    >
+                      Editar
+                    </Button>
+                    <IconButton
+                      onClick={() => manejarEliminarAsignatura(asignatura._id)}
+                      aria-label="delete"
+                      color="secondary"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </CardContent>
+                </Card>
+              ))}
+
+              <Pagination
+                count={totalPaginas}
+                page={paginaActual}
+                onChange={(event, value) => setPaginaActual(value)}
+                color="primary"
+              />
             </Paper>
           </Container>
 
-          <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
-            <Paper elevation={3} sx={{ padding: 2 }}>
-              <Typography variant="h5" component="h3" gutterBottom>
-                Asignaturas
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Box sx={{ padding: 2 }}>
-                    {asignaturasPaginadas.length > 0 ? (
-                      asignaturasPaginadas.map((asignatura) => (
-                        <Card key={asignatura.id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <CardContent sx={{ flexGrow: 1 }}>
-                            <Typography variant="h6">{asignatura.nombre}</Typography>
-                            <Typography color="textSecondary">Área: {asignatura.area}</Typography>
-                          </CardContent>
-                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            <IconButton color="primary" onClick={() => manejarEditarAsignatura(asignatura)}>
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton color="error" onClick={() => manejarEliminarAsignatura(asignatura._id)}>
-                              <DeleteIcon />
-                            </IconButton>
-                          </Box>
-                        </Card>
-                      ))
-                    ) : (
-                      <Typography variant="body2" color="textSecondary">
-                        No hay asignaturas que mostrar.
-                      </Typography>
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
-              {totalPaginas > 1 && (
-                <Pagination
-                  count={totalPaginas}
-                  page={paginaActual}
-                  onChange={(e, value) => setPaginaActual(value)}
-                  sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
-                />
-              )}
-            </Paper>
-          </Container>
+          <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+            <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
         </Box>
       </div>
       <Footer />
