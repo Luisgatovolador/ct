@@ -53,11 +53,16 @@ function Page() {
       const actividades = await fetch(`${API_URL}/actividad`);
       const actividadesData = await actividades.json();
 
-      setAsignaturas(asignaturasData);
       setDataUser(alumnoData);
       setPlaneacion(planeacionData);
       setActividades(actividadesData);
       setTareasEnviadas(tareasData);
+
+      // Filtrar las asignaturas del alumno
+      const asignaturasFiltradas = asignaturasData.filter((asignatura) =>
+        alumnoData.asignatura.includes(asignatura._id)
+      );
+      setAsignaturas(asignaturasFiltradas);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
