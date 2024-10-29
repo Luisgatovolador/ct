@@ -18,7 +18,7 @@ import { getUser } from "@/services/auth";
 
 const API_URL = "https://control-de-tareas-backend-production.up.railway.app/api";
 
-const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production.up.railway.app/";
+const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production.up.railway.app/uploads/";
 
 function Page() {
   const [user, setUser] = useState(null);
