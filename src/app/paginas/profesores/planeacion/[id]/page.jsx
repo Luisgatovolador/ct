@@ -124,18 +124,43 @@ function Page() {
       setActividades([...actividades, resultado]);
       setModalAbierto(false);
 
-      
-
+      await enviarCorreosAEstudiantes();
 
     } catch (error) {
       console.error("Error al agregar la actividad:", error);
     }
   };
+  
+  //  enviar correos 
+  const enviarCorreosAEstudiantes = async () => {
+    try {
+      const response = await fetch(`${API_URL}/alumnos`);
+      const alumnos = await response.json();
 
+      const alumnosAsignatura = alumnos.filter(alumno =>
+        alumno.asignatura === planeacion.asignatura
+      );
 
+      // Enviar correo a cada estudiante
+      for (const alumno of alumnosAsignatura) {
+        await fetch(`${API_URL}/mandarCorreo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            correo: alumno.correo,
+            asunto: "Nueva actividad disponible",
+            mensaje: `Se ha añadido una nueva actividad a la asignatura ${planeacion.nombre}`,
+          }),
+        });
+      }
+      console.log("Correos enviados a todos los estudiantes inscritos.");
 
-
-
+    } catch (error) {
+      console.error("Error al enviar los correos:", error);
+    }
+  };
 
 
   // Función para editar una actividad seleccionada

@@ -29,7 +29,7 @@ const Page = () => {
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const administradoresPorPagina = 5;
-  const [nuevoAdministrador, setNuevoAdministrador] = useState({ nombre: "", email: "", password: "", rolId: "" });
+  const [nuevoAdministrador, setNuevoAdministrador] = useState({ nombre: "", email: "", password: "", rol: "" });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [administradorAEditar, setAdministradorAEditar] = useState(null);
 
@@ -80,9 +80,17 @@ const Page = () => {
 
   // Agregar o actualizar un administrador en la base de datos
   const manejarAgregarAdministrador = async () => {
+    const { nombre, email, password, rol } = nuevoAdministrador;
+
+    // Validación de campos
+    if (!nombre || !email || !password || !rol) {
+      console.error("Todos los campos deben estar completos.");
+      return;
+    }
+
     try {
       if (modoEdicion) {
-        const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/administrador/${administradorAEditar.id}`, {
+        const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/administrador/${administradorAEditar._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -92,7 +100,7 @@ const Page = () => {
 
         if (response.ok) {
           const updatedAdministrador = await response.json();
-          setAdministradores(administradores.map(admin => (admin.id === updatedAdministrador.id ? updatedAdministrador : admin)));
+          setAdministradores(administradores.map(admin => (admin._id === updatedAdministrador._id ? updatedAdministrador : admin)));
           setModoEdicion(false);
           setAdministradorAEditar(null);
         }
@@ -104,6 +112,8 @@ const Page = () => {
           },
           body: JSON.stringify(nuevoAdministrador),
         });
+        console.log("Datos que se envían:", nuevoAdministrador);
+
 
         if (response.ok) {
           const nuevoAdministradorResponse = await response.json();
@@ -111,7 +121,8 @@ const Page = () => {
         }
       }
 
-      setNuevoAdministrador({ nombre: "", email: "", password: "", rolId: "" }); // Resetea rolId
+      // Resetear formulario
+      setNuevoAdministrador({ nombre: "", email: "", password: "", rol: "" });
     } catch (error) {
       console.error('Error al agregar o actualizar el administrador:', error);
     }
@@ -125,7 +136,7 @@ const Page = () => {
       });
 
       if (response.ok) {
-        setAdministradores(administradores.filter(admin => admin.id !== id));
+        setAdministradores(administradores.filter(admin => admin._id !== id));
       }
     } catch (error) {
       console.error('Error al eliminar el administrador:', error);
@@ -136,7 +147,7 @@ const Page = () => {
   const manejarEditarAdministrador = (admin) => {
     setModoEdicion(true);
     setAdministradorAEditar(admin);
-    setNuevoAdministrador({ nombre: admin.nombre, email: admin.email, password: "", rolId: admin.rolId });
+    setNuevoAdministrador({ nombre: admin.nombre, email: admin.email, password: "", rol: admin.rol });
   };
 
   return (
@@ -146,7 +157,6 @@ const Page = () => {
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            {/* Filtro por nombre */}
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
@@ -212,9 +222,9 @@ const Page = () => {
                   <InputLabel>Rol</InputLabel>
                   <Select
                     label="Rol"
-                    value={nuevoAdministrador.rolId}
+                    value={nuevoAdministrador.rol}
                     onChange={(e) =>
-                      setNuevoAdministrador({ ...nuevoAdministrador, rolId: e.target.value })
+                      setNuevoAdministrador({ ...nuevoAdministrador, rol: e.target.value })
                     }
                   >
                     {roles.map((rol) => (
@@ -244,44 +254,37 @@ const Page = () => {
             <Typography variant="h5" component="h3" gutterBottom>
               Administradores
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box sx={{ padding: 2 }}>
-                  {administradoresPaginados.length > 0 ? (
-                    administradoresPaginados.map((admin) => (
-                      <Card key={admin._id} sx={{ mb: 2 }}>
-                        <CardContent>
-                          <Typography variant="h6">{admin.nombre}</Typography>
-                          <Typography variant="body2">{admin.email}</Typography>
-                          <Box display="flex" justifyContent="flex-end" mt={2}>
-                            <IconButton onClick={() => manejarEditarAdministrador(admin)}>
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton onClick={() => manejarEliminarAdministrador(admin._id)}>
-                              <DeleteIcon />
-                            </IconButton>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <Typography>No hay administradores que coincidan con la búsqueda.</Typography>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-            {/* Paginación */}
-            <Pagination
-              count={totalPaginas}
-              page={paginaActual}
-              onChange={(event, value) => setPaginaActual(value)}
-              sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
-            />
+            {administradoresPaginados.map((admin) => (
+              <Card key={admin._id} sx={{ marginBottom: 2 }}>
+                <CardContent>
+                  <Typography variant="h6">{admin.nombre}</Typography>
+                  <Typography variant="body1">Email: {admin.email}</Typography>
+                  <Typography variant="body2">Rol: {admin.rol}</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <IconButton color="primary" onClick={() => manejarEditarAdministrador(admin)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton color="error" onClick={() => manejarEliminarAdministrador(admin._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
           </Paper>
         </Container>
 
-        <Footer />
+        <Container sx={{ display: 'flex', justifyContent: 'center', padding: 2 }}>
+          <Pagination
+            count={totalPaginas}
+            page={paginaActual}
+            onChange={(event, value) => setPaginaActual(value)}
+            color="primary"
+          />
+        </Container>
       </Box>
+
+      <Footer />
     </>
   );
 };

@@ -64,6 +64,7 @@ function Page() {
         alumnoData.asignatura.includes(asignatura._id)
       );
       setAsignaturas(asignaturasFiltradas);
+
     } catch (error) {
       console.error("Error fetching data:", error);
     }
