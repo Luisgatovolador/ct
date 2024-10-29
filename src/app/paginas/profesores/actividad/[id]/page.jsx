@@ -189,7 +189,7 @@ const Page = () => {
           </Paper>
         </Container>
 
-        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
+        <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1, minHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
               Tareas de los Alumnos

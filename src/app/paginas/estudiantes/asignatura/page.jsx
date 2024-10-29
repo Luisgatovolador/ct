@@ -148,12 +148,13 @@ function Page() {
   return (
     <>
       <Navbar />
-      <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column"  }}>
         <div className="px-44" style={{ flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h4" component="h2" gutterBottom>
-              Asignaturas
+        <Typography variant="h3" component="h2" gutterBottom sx={{marginTop:'2%', textAlign:'center',fontWeight: 'bold'}}>
+              ASIGNATURAS
             </Typography>
+          <Paper elevation={3} sx={{ padding: 2, width: '120%', marginTop:' 5%', marginLeft:'-10%' }}>
+          
             {asignaturasAlumno.length > 0 ? (
               asignaturasAlumno.map((asignatura) => {
                 const totalActividades =
@@ -163,59 +164,92 @@ function Page() {
                 return (
                   <Accordion key={asignatura._id}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>{asignatura.nombre}</Typography>
+                      <Typography sx={{fontSize:'150%'}}>{asignatura.nombre}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography>{asignatura.descripcion}</Typography>
 
-                      <Plot
-                        data={[
-                          {
-                            values: [
-                              asignatura.actividadesEntregadas.length,
-                              asignatura.actividadesPendientes.length,
-                            ],
-                            labels: ["Entregadas", "Pendientes"],
-                            type: "pie",
-                          },
-                        ]}
-                        layout={{
-                          title: `Avance: ${avance.toFixed(2)}%`,
-                          height: 400,
-                          width: 500,
-                        }}
-                      />
+                      {/* Contenedor principal en "flex" para alinear los Box horizontalmente */}
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        mt={2}
+                      >
+                        {/* Box para las actividades a la izquierda */}
+                        <Box flex={1} mr={2}>
+                          <Typography variant="h6" sx={{fontWeight: 'bold'}}>
+                            Actividades Pendientes:
+                          </Typography>
+                          {asignatura.actividadesPendientes.length > 0 ? (
+                            asignatura.actividadesPendientes.map(
+                              (actividad) => (
+                                <Box key={actividad._id} mb={2}>
+                                  <Typography>{actividad.titulo}</Typography>
+                                  <Button
+                                    variant="outlined"
+                                    onClick={() => openModal(actividad)}
+                                  >
+                                    Ver Detalles 
+                                  </Button>
+                                </Box>
+                              )
+                            )
+                          ) : (
+                            <Typography variant="body2">
+                              No tienes actividades pendientes.
+                            </Typography>
+                          )}
 
-                      <Box>
-                        <Typography variant="h6">Actividades Pendientes:</Typography>
-                        {asignatura.actividadesPendientes.length > 0 ? (
-                          asignatura.actividadesPendientes.map((actividad) => (
-                            <Box key={actividad._id} mb={2}>
-                              <Typography>{actividad.titulo}</Typography>
-                              <Button variant="outlined" onClick={() => openModal(actividad)}>
-                                Ver Detalles
-                              </Button>
-                            </Box>
-                          ))
-                        ) : (
-                          <Typography variant="body2">No tienes actividades pendientes.</Typography>
-                        )}
-                      </Box>
+                          <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold'}}>
+                            Actividades Entregadas:
+                          </Typography>
+                          {asignatura.actividadesEntregadas.length > 0 ? (
+                            asignatura.actividadesEntregadas.map(
+                              (actividad) => (
+                                <Box key={actividad._id} mb={2}>
+                                  <Typography >
+                                    {actividad.titulo} (Entregada)
+                                  </Typography>
+                                  <Button
+                                    variant="outlined"
+                                    color="primary" 
+                                    onClick={() => openModal(actividad)}
+                                    sx= {{marginTop: '2%'}}
 
-                      <Box>
-                        <Typography variant="h6">Actividades Entregadas:</Typography>
-                        {asignatura.actividadesEntregadas.length > 0 ? (
-                          asignatura.actividadesEntregadas.map((actividad) => (
-                            <Box key={actividad._id} mb={2}>
-                              <Typography>{actividad.titulo} (Entregada)</Typography>
-                              <Button variant="outlined" onClick={() => openModal(actividad)}>
-                                Ver Detalles
-                              </Button>
-                            </Box>
-                          ))
-                        ) : (
-                          <Typography variant="body2">No tienes actividades entregadas.</Typography>
-                        )}
+                                  >
+                                    Ver Detalles
+                                  </Button>
+                                </Box>
+                              )
+                            )
+                          ) : (
+                            <Typography variant="body2">
+                              No tienes actividades entregadas.
+                            </Typography>
+                          )}
+                        </Box>
+
+                        {/* Box para la gráfica a la derecha */}
+                        <Box sx={{ width: 500 }}>
+                          <Plot
+                            data={[
+                              {
+                                values: [
+                                  asignatura.actividadesEntregadas.length,
+                                  asignatura.actividadesPendientes.length,
+                                ],
+                                labels: ["Entregadas", "Pendientes"],
+                                type: "pie",
+                              },
+                            ]}
+                            layout={{
+                              title: `Avance: ${avance.toFixed(2)}%`,
+                              height: 400, // Tamaño de la gráfica ajustado
+                              width: 400,
+                            }}
+                          />
+                        </Box>
                       </Box>
                     </AccordionDetails>
                   </Accordion>
@@ -254,7 +288,7 @@ function Page() {
                 </>
               ) : (
                 <>
-                  <Typography variant="h6">Subir Tarea:</Typography>
+                  <Typography variant="h6">Subir Tarea:    </Typography>
                   <input type="file" onChange={handleFileChange} />
                   <Button variant="contained" onClick={handleSubmit} disabled={tareaEnviada}>
                     Enviar Tarea

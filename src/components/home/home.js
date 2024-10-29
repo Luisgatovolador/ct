@@ -22,8 +22,8 @@ export default function HomeStandard() {
         </Typography>
 
         <Grid container spacing={4} className="mt-6" >
-          <Grid item xs={12} md={4} sx={{marginLeft: '-7%', marginRight: "3%"}}>
-            <Card sx={{ height: '100%', backgroundColor:"#bfdae2"}}>
+          <Grid item xs={12} md={4} sx={{marginLeft:'-2%'}}>
+            <Card sx={{ height: '100%', backgroundColor:"#bfdae2",width:"100%"}}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Misión
@@ -38,8 +38,8 @@ export default function HomeStandard() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}  sx={{marginRight:'3%'}}>
-            <Card sx={{ height: '100%' , backgroundColor:"#bfdae2"}}>
+          <Grid item xs={12} md={4}  >
+            <Card sx={{ height: '100%' , backgroundColor:"#bfdae2",width:"100%"}}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Visión
@@ -54,8 +54,8 @@ export default function HomeStandard() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4} sx={{marginRight:'1%'}}>
-            <Card sx={{ height: '100%', backgroundColor:"#bfdae2" }}>
+          <Grid item xs={12} md={4} >
+            <Card sx={{ height: '100%', backgroundColor:"#bfdae2", width:"110%"}}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Valores
