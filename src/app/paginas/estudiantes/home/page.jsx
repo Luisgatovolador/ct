@@ -87,7 +87,7 @@ export default function Home() {
           </Typography>
 
           <div className="grid grid-cols-4 gap-10" >
-            {asignatura.map((asignatura, i) => (
+            {asignaturas.map((asignatura, i) => (
               <Card key={i} sx={{ maxWidth: 380 }}>
                 <CardMedia
                   sx={{ height: 140 }}
