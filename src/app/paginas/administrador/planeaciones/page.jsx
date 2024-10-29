@@ -61,22 +61,6 @@ const Page = () => {
     }
   };
 
-  // Aceptar una planeación
-  const manejarAceptarPlaneacion = (id) => {
-    setPlaneaciones(planeaciones.map(planeacion =>
-      planeacion._id === id ? { ...planeacion, estado: "Aceptada" } : planeacion
-    ));
-    actualizarPlaneacion(id, "Aceptada");
-  };
-
-  // Rechazar una planeación
-  const manejarRechazarPlaneacion = (id) => {
-    setPlaneaciones(planeaciones.map(planeacion =>
-      planeacion._id === id ? { ...planeacion, estado: "Rechazada" } : planeacion
-    ));
-    actualizarPlaneacion(id, "Rechazada");
-  };
-
   // Filtrar planeaciones por nombre y estado
   const planeacionesFiltradas = planeaciones.filter((planeacion) =>
     planeacion.nombre.toLowerCase().includes(busquedaNombre.toLowerCase()) &&

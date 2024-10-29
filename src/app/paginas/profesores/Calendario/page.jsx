@@ -56,21 +56,21 @@ const Page = () => {
     descripcion: "",
     fechaInicio: "",
     fechaFin: "",
-    profesorID: "", // Inicialmente vacío
+    profesorID: "", 
   });
 
-  const [open, setOpen] = useState(false); // Estado para manejar el modal
+  const [open, setOpen] = useState(false); 
 
   useEffect(() => {
     const fetchedUser = getUser();
     if (fetchedUser) {
       setUsuario(fetchedUser);
       fetchData(fetchedUser.id);
-      setNuevaActividad((prev) => ({ ...prev, profesorID: fetchedUser.id })); // Establecer el ID del profesor aquí
+      setNuevaActividad((prev) => ({ ...prev, profesorID: fetchedUser.id }));
     }
   }, []);
 
-  // Obtener actividades filtradas por el ID del profesor
+  // Obtener actividades filtradas 
   const fetchData = async (userId) => {
     try {
       const alumnoResponse = await fetch(`${API_URL}/profesor/${userId}`);

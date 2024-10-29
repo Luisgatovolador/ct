@@ -20,6 +20,7 @@ export default function Home() {
   const [asignaturas, setAsignaturas] = useState([]);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [planeaciones, setPlaneaciones] = useState([]);
 
   useEffect(() => {
     const fetchedUser = getUser();
@@ -28,17 +29,29 @@ export default function Home() {
       fetchData(fetchedUser.id);
     }
 
-    const fetchAsignaturas = async () => {
-      try {
-        const response = await fetch(`${API_URL}/asignatura/`);
-        const data = await response.json();
-        setAsignaturas(data);
-      } catch (error) {
-        console.error("Error al obtener las asignaturas", error);
-      }
-    };
     fetchAsignaturas();
+    fetchPlaneaciones();
   }, []);
+
+  const fetchAsignaturas = async () => {
+    try {
+      const response = await fetch(`${API_URL}/asignatura/`);
+      const data = await response.json();
+      setAsignaturas(data);
+    } catch (error) {
+      console.error("Error al obtener las asignaturas", error);
+    }
+  };
+
+  const fetchPlaneaciones = async () => {
+    try {
+      const response = await fetch(`${API_URL}/planeacion/`);
+      const data = await response.json();
+      setPlaneaciones(data);
+    } catch (error) {
+      console.error("Error al obtener las planeaciones", error);
+    }
+  };
 
   const fetchData = async (userId) => {
     try {
@@ -52,7 +65,6 @@ export default function Home() {
 
   const inscribirse = async (asignaturaId) => {
     try {
-      console.log(userData._id, asignaturaId)
       const inscripcionResponse = await fetch(`${API_URL}/alumno/inscribirse/${userData._id}`, {
         method: "PUT",
         headers: {
@@ -61,19 +73,23 @@ export default function Home() {
         body: JSON.stringify({
           alumnoId: userData._id,
           asignaturaId,
+         
         }),
       });
-  
+
       if (!inscripcionResponse.ok) {
         const errorData = await inscripcionResponse.json();
         throw new Error(errorData.error || "Error desconocido");
       }
-  
+
     } catch (error) {
       console.error("Error en el proceso de inscripción:", error);
     }
   };
-  
+
+  const getPlaneacionesPorAsignatura = (asignaturaId) => {
+    return planeaciones.filter(planeacion => planeacion.asignatura === asignaturaId);
+  };
 
   return (
     <>
@@ -81,36 +97,47 @@ export default function Home() {
       <div className="px-44">
         <ImageCarousel />
 
-        <Paper elevation={3} sx={{ padding: 2, width: '120%', marginLeft:'-10%' }}>
+        <Paper elevation={3} sx={{ padding: 2, width: '120%', marginLeft: '-10%' }}>
           <Typography variant="h4" component="h2" gutterBottom>
             Asignaturas
           </Typography>
 
-          <div className="grid grid-cols-4 gap-10" >
-            {asignaturas.map((asignatura, i) => (
-              <Card key={i} sx={{ maxWidth: 380 }}>
-                <CardMedia
-                  sx={{ height: 140 }}
-                  image={'https://www.unadmexico.mx/images/OfertaEducativa/presPEsmall/20_GestionIndustrial.webp'}
-                  title={asignatura.nombre}
-                />
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {asignatura.nombre}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Area: {asignatura.area}
-                    <br />
-                    Profesor: {asignatura.catedratico}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small" onClick={() => inscribirse(asignatura._id)}>
-                    Inscribirse
-                  </Button>
-                </CardActions>
-              </Card>
-            ))}
+          <div className="grid grid-cols-4 gap-10">
+            {asignaturas.map((asignatura, i) => {
+              const planeacionesAsignatura = getPlaneacionesPorAsignatura(asignatura._id);
+              return (
+                planeacionesAsignatura.length > 0 && (
+                  <Card key={i} sx={{ maxWidth: 380 }}>
+                    <CardMedia
+                      sx={{ height: 140 }}
+                      image={'https://www.unadmexico.mx/images/OfertaEducativa/presPEsmall/20_GestionIndustrial.webp'}
+                      title={asignatura.nombre}
+                    />
+                    <CardContent>
+                      <Typography gutterBottom variant="h5" component="div">
+                        {asignatura.nombre}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        Área: {asignatura.area}
+                        <br />
+                        Profesor: {asignatura.catedratico}
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      {planeacionesAsignatura.map((planeacion) => (
+                        <Button
+                          key={planeacion._id}
+                          size="small"
+                          onClick={() => inscribirse( planeacion._id)} // Pasamos el ID de la planeación
+                        >
+                          Inscribirse a {planeacion.nombre}
+                        </Button>
+                      ))}
+                    </CardActions>
+                  </Card>
+                )
+              );
+            })}
           </div>
         </Paper>
       </div>

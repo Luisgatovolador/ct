@@ -1,4 +1,5 @@
-"use client";
+"use client"
+
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -15,20 +16,17 @@ import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import Plot from "react-plotly.js";
 import { getUser } from "@/services/auth";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 const API_URL = "https://control-de-tareas-backend-production.up.railway.app/api";
-
 const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production.up.railway.app/uploads/";
 
 function Page() {
   const [user, setUser] = useState(null);
-  const [dataUser, setDataUser] = useState({});
-  const [asignaturas, setAsignaturas] = useState([]);
   const [actividades, setActividades] = useState([]);
   const [planeacion, setPlaneacion] = useState([]);
   const [tareasEnviadas, setTareasEnviadas] = useState([]);
   const [selectedActividad, setSelectedActividad] = useState(null);
-  const [selectedTarea, setSelectedTarea] = useState(null);
   const [archivo, setArchivo] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [tareaEnviada, setTareaEnviada] = useState(false);
@@ -37,36 +35,42 @@ function Page() {
     const fetchedUser = getUser();
     if (fetchedUser) {
       setUser(fetchedUser);
-      fetchData(fetchedUser.id);
+      obtenerDatos(fetchedUser.id);
     }
   }, []);
 
-  const fetchData = async (userId) => {
+  const obtenerDatos = async (idUsuario) => {
     try {
-      const alumno = await fetch(`${API_URL}/alumno/${userId}`);
-      const alumnoData = await alumno.json();
-      const tareas = await fetch(`${API_URL}/tarea?alumno=${userId}`);
-      const tareasData = await tareas.json();
-      const asignaturas = await fetch(`${API_URL}/asignatura`);
-      const asignaturasData = await asignaturas.json();
-      const planeaciones = await fetch(`${API_URL}/planeacion`);
-      const planeacionData = await planeaciones.json();
-      const actividades = await fetch(`${API_URL}/actividad`);
-      const actividadesData = await actividades.json();
+      const respuestaAlumno = await fetch(`${API_URL}/alumno/${idUsuario}`);
+      const datosAlumno = await respuestaAlumno.json();
 
-      setDataUser(alumnoData);
-      setPlaneacion(planeacionData);
-      setActividades(actividadesData);
-      setTareasEnviadas(tareasData);
+      const respuestaActividades = await fetch(`${API_URL}/actividad`);
+      const datosActividades = await respuestaActividades.json();
 
-      // Filtrar las asignaturas del alumno
-      const asignaturasFiltradas = asignaturasData.filter((asignatura) =>
-        alumnoData.asignatura.includes(asignatura._id)
-      );
-      setAsignaturas(asignaturasFiltradas);
+      if (datosAlumno.planeacionID && datosActividades.length > 0) {
+        const actividadesFiltradas = datosActividades.filter((actividad) =>
+          datosAlumno.planeacionID.includes(actividad.planeacionID)
+        );
+
+        setActividades(actividadesFiltradas);
+        console.log("Actividades Filtradas:", actividadesFiltradas);
+      }
+
+      const respuestaPlaneaciones = await fetch(`${API_URL}/planeacion`);
+      const datosPlaneaciones = await respuestaPlaneaciones.json();
+
+      setPlaneacion(datosPlaneaciones.filter((planeacion) =>
+        datosAlumno.planeacionID.includes(planeacion._id)
+      ));
+
+      const respuestaTarea = await fetch(`${API_URL}/tarea`);
+      const datosTarea = await respuestaTarea.json();
+
+      setTareasEnviadas(datosTarea.filter(tarea => tarea.alumno === idUsuario)); // Filtrar tareas del usuario
+      console.log("Tareas Enviadas:", datosTarea);
 
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error al cargar las actividades o planeaciones:", error);
     }
   };
 
@@ -77,14 +81,12 @@ function Page() {
   const openModal = (actividad) => {
     const tarea = tareasEnviadas.find((tarea) => tarea.actividad === actividad._id);
     setSelectedActividad(actividad);
-    setSelectedTarea(tarea || null);
     setTareaEnviada(Boolean(tarea));
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setSelectedActividad(null);
-    setSelectedTarea(null);
     setArchivo(null);
     setModalOpen(false);
   };
@@ -118,141 +120,102 @@ function Page() {
       });
 
       setTareaEnviada(true);
-      setSelectedTarea(tareaData);
       closeModal();
+      window.location.reload()
     } catch (error) {
       console.error("Error submitting task:", error);
     }
   };
 
-  const asignaturasAlumno = asignaturas.map((asignatura) => {
-    const planeacionesAsignatura = planeacion.filter(
-      (p) => p.asignatura === asignatura._id
-    );
-
-    const actividadesAsignatura = actividades.filter((actividad) =>
-      planeacionesAsignatura.some((p) => p._id === actividad.planeacionID)
-    );
-
-    const actividadesPendientes = actividadesAsignatura.filter(
-      (actividad) =>
-        !tareasEnviadas.some((tarea) => tarea.actividad === actividad._id) &&
-        new Date(actividad.fechaFin) > new Date()
-    );
-
-    const actividadesEntregadas = actividadesAsignatura.filter((actividad) =>
-      tareasEnviadas.some((tarea) => tarea.actividad === actividad._id)
-    );
-
-    return {
-      ...asignatura,
-      actividadesPendientes,
-      actividadesEntregadas,
-    };
-  });
-
   return (
     <>
       <Navbar />
-      <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column"  }}>
+      <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <div className="px-44" style={{ flexGrow: 1 }}>
-        <Typography variant="h3" component="h2" gutterBottom sx={{marginTop:'2%', textAlign:'center',fontWeight: 'bold'}}>
-              ASIGNATURAS
-            </Typography>
-          <Paper elevation={3} sx={{ padding: 2, width: '120%', marginTop:' 5%', marginLeft:'-10%' }}>
-          
-            {asignaturasAlumno.length > 0 ? (
-              asignaturasAlumno.map((asignatura) => {
-                const totalActividades =
-                  asignatura.actividadesPendientes.length + asignatura.actividadesEntregadas.length;
-                const avance = (asignatura.actividadesEntregadas.length / totalActividades) * 100;
+          <Typography variant="h3" component="h2" gutterBottom sx={{ marginTop: '2%', textAlign: 'center', fontWeight: 'bold' }}>
+            ACTIVIDADES
+          </Typography>
+          <Paper elevation={3} sx={{ padding: 2, width: '120%', marginTop: '5%', marginLeft: '-10%' }}>
+            {planeacion.length > 0 ? (
+              planeacion.map((planeacion) => {
+                const actividadesPlaneacion = actividades.filter(actividad => planeacion._id === actividad.planeacionID);
+                
+                // Filtrado de tareas
+                const tareasPendientes = actividadesPlaneacion.filter(actividad =>
+                  !tareasEnviadas.some(tarea => tarea.actividad === actividad._id)
+                );
+
+                const tareasEntregadas = actividadesPlaneacion.filter(actividad =>
+                  tareasEnviadas.some(tarea => tarea.actividad === actividad._id)
+                );
+
+                const totalActividades = tareasPendientes.length + tareasEntregadas.length;
+                const avance = totalActividades > 0 ? (tareasEntregadas.length / totalActividades) * 100 : 0;
 
                 return (
-                  <Accordion key={asignatura._id}>
+                  <Accordion key={planeacion._id}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography sx={{fontSize:'150%'}}>{asignatura.nombre}</Typography>
+                      <Typography sx={{ fontSize: '150%' }}>{planeacion.nombre}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <Typography>{asignatura.descripcion}</Typography>
+                      <Typography>{planeacion.descripcion}</Typography>
 
-                      {/* Contenedor principal en "flex" para alinear los Box horizontalmente */}
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
-                        mt={2}
-                      >
-                        {/* Box para las actividades a la izquierda */}
+                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mt={2}>
                         <Box flex={1} mr={2}>
-                          <Typography variant="h6" sx={{fontWeight: 'bold'}}>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                             Actividades Pendientes:
                           </Typography>
-                          {asignatura.actividadesPendientes.length > 0 ? (
-                            asignatura.actividadesPendientes.map(
-                              (actividad) => (
-                                <Box key={actividad._id} mb={2}>
-                                  <Typography>{actividad.titulo}</Typography>
-                                  <Button
-                                    variant="outlined"
-                                    onClick={() => openModal(actividad)}
-                                  >
-                                    Ver Detalles 
-                                  </Button>
-                                </Box>
-                              )
-                            )
+                          {tareasPendientes.length > 0 ? (
+                            tareasPendientes.map(actividad => (
+                              <Box key={actividad._id} mb={2}>
+                                <Typography>{actividad.titulo}</Typography>
+                                <Button 
+                                  variant="outlined" 
+                                  onClick={() => openModal(actividad)} 
+                                  disabled={new Date(actividad.fechaFin) < new Date()} // Desactiva el botón si la fecha ha pasado
+                                >
+                                  Ver Detalles
+                                </Button>
+                              </Box>
+                            ))
                           ) : (
-                            <Typography variant="body2">
-                              No tienes actividades pendientes.
-                            </Typography>
+                            <Typography variant="body2">No tienes actividades pendientes.</Typography>
                           )}
 
-                          <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold'}}>
+                          <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
                             Actividades Entregadas:
                           </Typography>
-                          {asignatura.actividadesEntregadas.length > 0 ? (
-                            asignatura.actividadesEntregadas.map(
-                              (actividad) => (
-                                <Box key={actividad._id} mb={2}>
-                                  <Typography >
-                                    {actividad.titulo} (Entregada)
-                                  </Typography>
-                                  <Button
-                                    variant="outlined"
-                                    color="primary" 
-                                    onClick={() => openModal(actividad)}
-                                    sx= {{marginTop: '2%'}}
-
-                                  >
-                                    Ver Detalles
-                                  </Button>
-                                </Box>
-                              )
-                            )
+                          
+                          {tareasEntregadas.length > 0 ? (
+                            tareasEntregadas.map(actividad => (
+                              <Box key={actividad._id} mb={2}>
+                                <Typography>{actividad.titulo} (Entregada)</Typography>
+                                <Button 
+                                  variant="outlined" 
+                                  color="primary" 
+                                  onClick={() => openModal(actividad)} 
+                                  sx={{ marginTop: '2%' }} 
+                                  disabled={new Date(actividad.fechaFin) < new Date()} // Desactiva el botón si la fecha ha pasado
+                                >
+                                  Ver Detalles
+                                </Button>
+                              </Box>
+                            ))
                           ) : (
-                            <Typography variant="body2">
-                              No tienes actividades entregadas.
-                            </Typography>
+                            <Typography variant="body2">No tienes actividades entregadas.</Typography>
                           )}
                         </Box>
 
-                        {/* Box para la gráfica a la derecha */}
                         <Box sx={{ width: 500 }}>
                           <Plot
-                            data={[
-                              {
-                                values: [
-                                  asignatura.actividadesEntregadas.length,
-                                  asignatura.actividadesPendientes.length,
-                                ],
-                                labels: ["Entregadas", "Pendientes"],
-                                type: "pie",
-                              },
-                            ]}
+                            data={[{
+                              values: [tareasEntregadas.length, tareasPendientes.length],
+                              labels: ["Entregadas", "Pendientes"],
+                              type: "pie",
+                            }]}
                             layout={{
                               title: `Avance: ${avance.toFixed(2)}%`,
-                              height: 400, // Tamaño de la gráfica ajustado
-                              width: 400,
+                              showlegend: true,
                             }}
                           />
                         </Box>
@@ -262,49 +225,105 @@ function Page() {
                 );
               })
             ) : (
-              <Typography>No tienes asignaturas registradas.</Typography>
+              <Typography>No tienes planeaciones disponibles.</Typography>
             )}
           </Paper>
         </div>
-        <Footer />
       </Box>
 
       <Modal open={modalOpen} onClose={closeModal}>
-        <Box sx={{ padding: 4, backgroundColor: "white", maxWidth: 600, margin: "auto", mt: 10 }}>
-          {selectedActividad && (
-            <>
-              <Typography variant="h6">{selectedActividad.titulo}</Typography>
-              <Typography>{selectedActividad.descripcion}</Typography>
-              <Typography>Fecha de entrega: {new Date(selectedActividad.fechaFin).toLocaleDateString()}</Typography>
+  <Box
+    sx={{
+      display: 'flex', // Habilita el uso de Flexbox
+      justifyContent: 'center', // Centra horizontalmente
+      alignItems: 'center', // Centra verticalmente
+      height: '100vh', // Asegura que ocupe toda la altura de la ventana
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro con opacidad
+    }}
+  >
+    <Box
+      sx={{
+        padding: 4,
+        backgroundColor: 'white',
+        borderRadius: 2,
+        width: 500,
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
+        {selectedActividad ? selectedActividad.titulo : ""}
+      </Typography>
+      <Typography variant="body1" sx={{ marginBottom: 2 }}>
+        {selectedActividad ? selectedActividad.descripcion : ""}
+      </Typography>
 
-              {tareaEnviada ? (
-                <>
-                  <Typography variant="h6">Detalles de la Tarea:</Typography>
-                  <Typography>Calificación: {selectedTarea.calificacion}</Typography>
-                  <Typography>
-                    Retroalimentación:{" "}
-                    {selectedTarea.retroalimentacion?.trim() || "Sin retroalimentación"}
-                  </Typography>
-                  {selectedTarea.archivo && (
-                    <a href={`${API_URL_PA_IMAGENES}${selectedTarea.archivo}`} target="_blank" rel="noopener noreferrer">
-                      Ver tarea
-                      <img src="/fileImg.png" alt="Archivo" width={50} />
-                    </a>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Typography variant="h6">Subir Tarea:    </Typography>
-                  <input type="file" onChange={handleFileChange} />
-                  <Button variant="contained" onClick={handleSubmit} disabled={tareaEnviada}>
-                    Enviar Tarea
-                  </Button>
-                </>
-              )}
-            </>
-          )}
+      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
+        Fechas:
+      </Typography>
+      <Typography variant="body2">
+        Inicio: {selectedActividad ? new Date(selectedActividad.fechaInicio).toLocaleDateString() : ""}
+      </Typography>
+      <Typography variant="body2">
+        Fin: {selectedActividad ? new Date(selectedActividad.fechaFin).toLocaleDateString() : ""}
+      </Typography>
+      
+      {/* Mensaje si la actividad está fuera de plazo */}
+      {selectedActividad && new Date(selectedActividad.fechaFin) < new Date() ? (
+        <Typography variant="body2" sx={{ color: 'red', fontWeight: 'bold', marginTop: 2 }}>
+          Esta actividad ha pasado su fecha límite y no se puede entregar.
+        </Typography>
+      ) : null}
+
+      {/* Mostrar el archivo si existe */}
+      {selectedActividad && selectedActividad.archivo && (
+        <Box sx={{ marginTop: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
+            Archivo:
+          </Typography>
+          <Typography variant="body2">
+            <DescriptionIcon sx={{ marginRight: 1 }} />
+            {selectedActividad.archivo}
+            <a 
+              href={`${API_URL_PA_IMAGENES}${selectedActividad.archivo}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{ marginLeft: 5 }}
+            >
+              <img src="/fileImg.png" alt="Archivo" width={20} />
+            </a>
+          </Typography>
         </Box>
-      </Modal>
+      )}
+
+      {/* Contenedor flex para alinear el input y el botón */}
+      <Box sx={{ marginTop: 2, marginBottom: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+            Agregar documento para entregar tarea:
+          </Typography>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            style={{ marginTop: 10, padding: 5 }}
+            disabled={selectedActividad && new Date(selectedActividad.fechaFin) < new Date()} // Desactiva el input si la fecha ha pasado
+          />
+        </Box>
+        
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          sx={{ mt: 2, bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, marginLeft: 2 }}
+          disabled={selectedActividad && new Date(selectedActividad.fechaFin) < new Date()} // Desactiva el botón si la fecha ha pasado
+        >
+          Enviar Tarea
+        </Button>
+      </Box>
+    </Box>
+  </Box>
+</Modal>
+
+
+      <Footer />
     </>
   );
 }

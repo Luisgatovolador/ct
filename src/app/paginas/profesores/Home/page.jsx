@@ -19,7 +19,7 @@ import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
 
 export default function Home() {
-  const [asignatura, setAsignatura] = React.useState([]);
+  const [asignaturas, setAsignatura] = React.useState([]);
 
   useEffect(() => {
     const Asignaturas = async () => {
@@ -47,7 +47,7 @@ export default function Home() {
           </Typography>
 
           <div className="grid grid-cols-3 gap-10">
-            {asignatura.map((asignatura, i) => (
+            {asignaturas.map((asignatura, i) => (
               <Card key={i} sx={{ maxWidth: 345 , marginTop:'2%'}}>
                 <CardMedia
                   sx={{ height: 140 }}

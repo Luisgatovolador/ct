@@ -112,6 +112,7 @@ const Page = () => {
       setTareas(nuevasTareas);
       setSnackbarMessage("Calificación guardada con éxito");
       setSnackbarOpen(true);
+      window.location.reload()
     } catch (error) {
       console.error("Error al calificar la tarea", error);
       setSnackbarMessage("Error al guardar la calificación");
