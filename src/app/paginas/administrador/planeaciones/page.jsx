@@ -12,12 +12,14 @@ import {
   IconButton,
   Box,
   Pagination,
-  MenuItem
+  MenuItem,
+  Button
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Navbar from '@/components/Navbars/navbar';
 import Footer from '@/components/footer/footer';
+import Link from "next/link";
 
 const Page = () => {
   const [planeaciones, setPlaneaciones] = useState([]);
@@ -26,7 +28,7 @@ const Page = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const planeacionesPorPagina = 5;
 
-  // Función para obtener las planeaciones desde la API
+  // Obtener planeaciones desde la API
   useEffect(() => {
     const obtenerPlaneaciones = async () => {
       try {
@@ -42,16 +44,14 @@ const Page = () => {
     obtenerPlaneaciones();
   }, []);
 
-  // Función para actualizar la planeación en la API
+  // Actualizar estado de planeación en la API
   const actualizarPlaneacion = async (id, estado) => {
     try {
       const response = await fetch(
         `https://control-de-tareas-backend-production.up.railway.app/api/planeacion/${id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ estado }),
         }
       );
@@ -61,7 +61,7 @@ const Page = () => {
     }
   };
 
-  // Manejar aceptación de una planeación
+  // Aceptar una planeación
   const manejarAceptarPlaneacion = (id) => {
     setPlaneaciones(planeaciones.map(planeacion =>
       planeacion._id === id ? { ...planeacion, estado: "Aceptada" } : planeacion
@@ -69,7 +69,7 @@ const Page = () => {
     actualizarPlaneacion(id, "Aceptada");
   };
 
-  // Manejar rechazo de una planeación
+  // Rechazar una planeación
   const manejarRechazarPlaneacion = (id) => {
     setPlaneaciones(planeaciones.map(planeacion =>
       planeacion._id === id ? { ...planeacion, estado: "Rechazada" } : planeacion
@@ -94,7 +94,6 @@ const Page = () => {
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            {/* Filtro por nombre y estado */}
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
@@ -124,7 +123,6 @@ const Page = () => {
           </Paper>
         </Container>
 
-        {/* Lista de planeaciones filtradas */}
         <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1 }}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h5" component="h3" gutterBottom>
@@ -138,15 +136,17 @@ const Page = () => {
                       <Card key={planeacion._id} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <CardContent sx={{ flexGrow: 1 }}>
                           <Typography variant="h6">{planeacion.nombre}</Typography>
-                          <Typography color="textSecondary">Estado: {planeacion.estado}</Typography>
+                          <Typography color="textSecondary">Asignatura: {planeacion.asignatura}</Typography>
+                          <Typography color="textSecondary">Fecha de Inicio: {planeacion.fechaComienzo}</Typography>
+                          <Typography color="textSecondary">Fecha de término: {planeacion.fechaFin}</Typography>
                         </CardContent>
-                        <Box sx={{ display: 'flex' }}>
-                          <IconButton color="success" onClick={() => manejarAceptarPlaneacion(planeacion._id)} disabled={planeacion.estado !== "Pendiente"}>
-                            <CheckIcon />
-                          </IconButton>
-                          <IconButton color="error" onClick={() => manejarRechazarPlaneacion(planeacion._id)} disabled={planeacion.estado !== "Pendiente"}>
-                            <CancelIcon />
-                          </IconButton>
+                        <Box sx={{ display: 'flex', alignItems: 'center', pr: 2 }}>
+                         
+                          <Link href={`/paginas/administrador/planeacion/${planeacion._id}`} passHref>
+                            <Button variant="outlined" sx={{ ml: 2 }}>
+                              Ver Detalles
+                            </Button>
+                          </Link>
                         </Box>
                       </Card>
                     ))
@@ -169,7 +169,6 @@ const Page = () => {
           </Paper>
         </Container>
 
-        {/* Footer siempre en la parte inferior */}
         <Footer />
       </Box>
     </>

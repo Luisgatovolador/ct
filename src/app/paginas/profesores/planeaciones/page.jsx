@@ -137,17 +137,18 @@ function Page() {
         sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
       >
         <div className="px-44" style={{ flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h4" component="h2" gutterBottom>
+        <Typography variant="h4" component="h2" gutterBottom sx={{textAlign: 'center'}}>
               Asignaturas de {profesorData.nombre}
             </Typography>
+          <Paper elevation={3} sx={{ padding: 2, width: '120%', marginLeft: '-10% '}}>
+           
             <div className="grid grid-cols-3 gap-10">
               {asignaturasFiltradas.length > 0 ? (
                 asignaturasFiltradas.map((asignatura) => (
                   <Card key={asignatura._id}>
                     <CardMedia
                       sx={{ height: 140 }}
-                      image={"https://via.placeholder.com/150"}
+                      image={"https://www.unadmexico.mx/images/OfertaEducativa/presPEsmall/20_GestionIndustrial.webp"}
                       title={asignatura.nombre}
                     />
                     <CardContent>

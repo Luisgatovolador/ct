@@ -80,16 +80,18 @@ export default function Home() {
       <Navbar />
       <div className="px-44">
         <ImageCarousel />
-        <Paper elevation={3} sx={{ padding: 2 }}>
+
+        <Paper elevation={3} sx={{ padding: 2, width: '120%', marginLeft:'-10%' }}>
           <Typography variant="h4" component="h2" gutterBottom>
             Asignaturas
           </Typography>
-          <div className="grid grid-cols-3 gap-10">
-            {asignaturas.map((asignatura, i) => (
-              <Card key={i} sx={{ maxWidth: 345 }}>
+
+          <div className="grid grid-cols-4 gap-10" >
+            {asignatura.map((asignatura, i) => (
+              <Card key={i} sx={{ maxWidth: 380 }}>
                 <CardMedia
                   sx={{ height: 140 }}
-                  image={'https://via.placeholder.com/150'}
+                  image={'https://www.unadmexico.mx/images/OfertaEducativa/presPEsmall/20_GestionIndustrial.webp'}
                   title={asignatura.nombre}
                 />
                 <CardContent>
