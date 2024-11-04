@@ -33,6 +33,7 @@ function Page() {
     fechaFin: "",
     asignatura: null,
   });
+  const [areas, setAreas] = useState([]);
 
   // Este useEffect obtiene al usuario y datos relacionados
   useEffect(() => {
@@ -40,6 +41,7 @@ function Page() {
     if (fetchedUser) {
       setUser(fetchedUser);
       fetchProfesorData(fetchedUser.id);
+      fetchArea();
     }
   }, []);
 
@@ -74,6 +76,16 @@ function Page() {
       console.error("Error al obtener las planeaciones:", error);
     }
   };
+
+  const fetchArea = async  ()=> {
+    try {
+      const areas = await fetch(`${API_URL}/area`)
+      const areasData = await areas.json();
+      setAreas(areasData)
+    } catch (error) {
+      console.error("Error fetching areas :(")
+    }
+  }
 
   const getPlaneacionesAsignatura = (asignaturaId) => {
     return planeaciones.filter(
@@ -159,7 +171,7 @@ function Page() {
                         variant="body2"
                         sx={{ color: "text.secondary" }}
                       >
-                        Área: {asignatura.area}
+                        Área: {areas?.find((area) => area._id === asignatura.area)?.nombre || "Área no encontrada"}
                       </Typography>
                     </CardContent>
                     <CardActions>
