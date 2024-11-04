@@ -22,8 +22,8 @@ import { useParams } from "next/navigation";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DescriptionIcon from "@mui/icons-material/Description";
 
-const API_URL ="https://control-de-tareas-backend-production.up.railway.app/api";
-const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production.up.railway.app/uploads/";
+const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
+const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production-222f.up.railway.app/uploads/";
 
 function Page() {
   const [planeacion, setPlaneacion] = useState(null);
@@ -131,36 +131,41 @@ function Page() {
     }
   };
   
-  //  enviar correos 
-  const enviarCorreosAEstudiantes = async () => {
-    try {
-      const response = await fetch(`${API_URL}/alumnos`);
-      const alumnos = await response.json();
+  // Enviar correos a estudiantes
+const enviarCorreosAEstudiantes = async () => {
+  try {
+    const response = await fetch(`${API_URL}/alumno`);
+    const alumnos = await response.json();
 
-      const alumnosAsignatura = alumnos.filter(alumno =>
-        alumno.asignatura === planeacion.asignatura
-      );
+    // Filtra los alumnos que tienen la planeación específica
+    const alumnosAsignados = alumnos.filter((alumno) =>
+      alumno.planeacionID.includes(id) // Asegúrate de que `id` es el ID de la planeación actual
+    );
 
-      // Enviar correo a cada estudiante
-      for (const alumno of alumnosAsignatura) {
-        await fetch(`${API_URL}/mandarCorreo`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            correo: alumno.correo,
-            asunto: "Nueva actividad disponible",
-            mensaje: `Se ha añadido una nueva actividad a la asignatura ${planeacion.nombre}`,
-          }),
-        });
-      }
-      console.log("Correos enviados a todos los estudiantes inscritos.");
+    // Crea un arreglo de promesas para enviar correos en paralelo
+    const envioCorreos = alumnosAsignados.map(alumno =>
+      fetch(`${API_URL}/mandarCorreo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          correo: alumno.email, // Asegúrate de usar el campo `email` correcto
+          asunto: "Nueva actividad disponible",
+          mensaje: `Se ha añadido una nueva actividad a la asignatura ${planeacion.nombre}`,
+        }),
+      })
+    );
 
-    } catch (error) {
-      console.error("Error al enviar los correos:", error);
-    }
-  };
+    // Espera a que todas las promesas se resuelvan
+    await Promise.all(envioCorreos);
+    console.log("Correos enviados a todos los estudiantes inscritos.");
+    
+  } catch (error) {
+    console.error("Error al enviar los correos:", error);
+  }
+};
+
 
 
   // Función para editar una actividad seleccionada

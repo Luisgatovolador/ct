@@ -27,13 +27,15 @@ const Page = () => {
   const [filtroEstado, setFiltroEstado] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const planeacionesPorPagina = 5;
-
+  
+  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+  
   // Obtener planeaciones desde la API
   useEffect(() => {
     const obtenerPlaneaciones = async () => {
       try {
         const response = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/planeacion/"
+          `${API_URL}planeacion/`
         );
         const data = await response.json();
         setPlaneaciones(data);
@@ -48,7 +50,7 @@ const Page = () => {
   const actualizarPlaneacion = async (id, estado) => {
     try {
       const response = await fetch(
-        `https://control-de-tareas-backend-production.up.railway.app/api/planeacion/${id}`,
+        `${API_URL}planeacion/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

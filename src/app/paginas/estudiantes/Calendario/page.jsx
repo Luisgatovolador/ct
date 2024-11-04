@@ -19,8 +19,9 @@ import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import { getUser } from "@/services/auth";
 
-const URL_API = "https://control-de-tareas-backend-production.up.railway.app/api";
-const URL_API_PARA_IMAGENES = "https://control-de-tareas-backend-production.up.railway.app/uploads/";
+
+const URL_API = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
+const URL_API_PARA_IMAGENES = "https://control-de-tareas-backend-production-222f.up.railway.app/uploads/";
 
 const localizaciones = {
   es: es,

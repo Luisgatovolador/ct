@@ -23,10 +23,10 @@ import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import { useParams } from "next/navigation";
 
-const API_URL =
-  "https://control-de-tareas-backend-production.up.railway.app/api";
+const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
+
 const API_URL_PA_IMAGENES =
-  "https://control-de-tareas-backend-production.up.railway.app/uploads/";
+  "https://control-de-tareas-backend-production-222f.up.railway.app/uploads/";
 
 const Page = () => {
   const [busquedaAlumno, setBusquedaAlumno] = useState("");

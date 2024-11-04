@@ -23,11 +23,13 @@ const Page = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
+  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+
   useEffect(() => {
     const fetchAreas = async () => {
       try {
         const responseAreas = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/area/"
+          `${API_URL}area/`
         );
         const dataAreas = await responseAreas.json();
         setAreas(dataAreas);
@@ -42,7 +44,7 @@ const Page = () => {
   useEffect(() => {
     const fetchAsignaturas = async () => {
       try {
-        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura/');
+        const response = await fetch(`${API_URL}asignatura/`);
         const data = await response.json();
         setAsignaturas(data);
       } catch (error) {
@@ -86,7 +88,7 @@ const Page = () => {
 
     try {
       if (modoEdicion) {
-        const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/asignatura/${asignaturaAEditar._id}`, {
+        const response = await fetch(`${API_URL}asignatura/${asignaturaAEditar._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -102,7 +104,7 @@ const Page = () => {
         }
       } else {
         // Crear nueva asignatura
-        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura', {
+        const response = await fetch(`${API_URL}asignatura`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -125,7 +127,7 @@ const Page = () => {
   // Manejar eliminar asignatura
   const manejarEliminarAsignatura = async (id) => {
     try {
-      const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/asignatura/${id}`, {
+      const response = await fetch(`${API_URL}asignatura/${id}`, {
         method: 'DELETE',
       });
 

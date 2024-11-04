@@ -14,6 +14,8 @@ import Footer from "@/components/footer/footer";
 import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
 
+const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+
 export default function Home() {
   const [asignatura, setAsignatura] = React.useState([]);
 
@@ -21,7 +23,7 @@ export default function Home() {
     const Asignaturas = async () => {
       try {
         const response = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/asignatura/"
+          `${API_URL}asignatura/`
         );
         const data = await response.json();
         setAsignatura(data);

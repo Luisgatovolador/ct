@@ -35,6 +35,7 @@ const Page = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const profesoresPorPagina = 4;
 
+  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
   const [nuevoProfesor, setNuevoProfesor] = useState({
     nombre: "",
     email: "",
@@ -53,7 +54,7 @@ const Page = () => {
   useEffect(() => {
     const fetchProfesores = async () => {
       try {
-        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/profesor/');
+        const response = await fetch(`${API_URL}profesor/`);
         const data = await response.json();
         if (Array.isArray(data)) {
           setProfesores(data);
@@ -71,11 +72,11 @@ const Page = () => {
   useEffect(() => {
     const fetchMateriasYRoles = async () => {
       try {
-        const responseMaterias = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/asignatura/');
+        const responseMaterias = await fetch(`${API_URL}asignatura/`);
         const dataMaterias = await responseMaterias.json();
         setMaterias(dataMaterias);
 
-        const responseRoles = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/rol/');
+        const responseRoles = await fetch(`${API_URL}rol/`);
         const dataRoles = await responseRoles.json();
         setRoles(dataRoles);
       } catch (error) {
@@ -116,7 +117,7 @@ const Page = () => {
     try {
       if (modoEdicion && profesorAEditar) {
         const response = await fetch(
-          `https://control-de-tareas-backend-production.up.railway.app/api/profesor/${profesorAEditar._id}`,
+          `${API_URL}profesor/${profesorAEditar._id}`,
           {
             method: 'PUT',
             headers: {
@@ -139,7 +140,7 @@ const Page = () => {
         }
       } else {
         const response = await fetch(
-          'https://control-de-tareas-backend-production.up.railway.app/api/profesor/',
+          `${API_URL}profesor/`,
           {
             method: 'POST',
             headers: {
@@ -173,7 +174,7 @@ const Page = () => {
   const manejarEliminarProfesor = async (id) => {
     try {
       const response = await fetch(
-        `https://control-de-tareas-backend-production.up.railway.app/api/profesor/${id}`,
+        `${API_URL}profesor/${id}`,
         {
           method: 'DELETE',
         }

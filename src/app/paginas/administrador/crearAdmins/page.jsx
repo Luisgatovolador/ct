@@ -32,12 +32,13 @@ const Page = () => {
   const [nuevoAdministrador, setNuevoAdministrador] = useState({ nombre: "", email: "", password: "", rol: "" });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [administradorAEditar, setAdministradorAEditar] = useState(null);
-
+  
+  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
   // Obtener los administradores del backend
   useEffect(() => {
     const fetchAdministradores = async () => {
       try {
-        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/administrador');
+        const response = await fetch(`${API_URL}administrador`);
         const data = await response.json();
         
         if (Array.isArray(data)) {
@@ -58,7 +59,7 @@ const Page = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const responseRoles = await fetch("https://control-de-tareas-backend-production.up.railway.app/api/rol/");
+        const responseRoles = await fetch(`${API_URL}rol/`);
         const dataRoles = await responseRoles.json();
         setRoles(dataRoles);
       } catch (error) {
@@ -90,7 +91,7 @@ const Page = () => {
 
     try {
       if (modoEdicion) {
-        const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/administrador/${administradorAEditar._id}`, {
+        const response = await fetch(`${API_URL}administrador/${administradorAEditar._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -105,7 +106,7 @@ const Page = () => {
           setAdministradorAEditar(null);
         }
       } else {
-        const response = await fetch('https://control-de-tareas-backend-production.up.railway.app/api/administrador', {
+        const response = await fetch(`${API_URL}administrador`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -131,7 +132,7 @@ const Page = () => {
   // Eliminar un administrador de la base de datos
   const manejarEliminarAdministrador = async (id) => {
     try {
-      const response = await fetch(`https://control-de-tareas-backend-production.up.railway.app/api/administrador/${id}`, {
+      const response = await fetch(`${API_URL}administrador/${id}`, {
         method: 'DELETE',
       });
 

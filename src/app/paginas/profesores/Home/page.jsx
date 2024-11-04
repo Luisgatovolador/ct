@@ -20,12 +20,13 @@ import { useEffect } from "react";
 
 export default function Home() {
   const [asignaturas, setAsignatura] = React.useState([]);
+ 
 
   useEffect(() => {
     const Asignaturas = async () => {
       try {
         const response = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/asignatura/"
+          "https://control-de-tareas-backend-production-222f.up.railway.app/api/asignatura/"
         );
         const data = await response.json();
         setAsignatura(data);

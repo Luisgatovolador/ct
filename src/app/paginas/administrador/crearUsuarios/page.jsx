@@ -42,12 +42,13 @@ const Page = () => {
   });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [alumnoAEditar, setAlumnoAEditar] = useState(null);
-
+  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+  
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const responseRoles = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/rol/"
+          `${API_URL}rol/`
         );
         const dataRoles = await responseRoles.json();
         setRoles(dataRoles);
@@ -62,7 +63,7 @@ const Page = () => {
     const fetchAreas = async () => {
       try {
         const responseAreas = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/area/"
+          `${API_URL}area/`
         );
         const dataAreas = await responseAreas.json();
         setAreas(dataAreas);
@@ -78,7 +79,7 @@ const Page = () => {
     const fetchAlumnos = async () => {
       try {
         const response = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/alumno/"
+          `${API_URL}alumno/`
         );
         const data = await response.json();
         setAlumnos(data);
@@ -117,7 +118,7 @@ const Page = () => {
       if (modoEdicion) {
         // Actualizar alumno
         const response = await fetch(
-          `https://control-de-tareas-backend-production.up.railway.app/api/alumno/${alumnoAEditar._id}`,
+          `${API_URL}alumno/${alumnoAEditar._id}`,
           {
             method: "PUT",
             headers: {
@@ -140,7 +141,7 @@ const Page = () => {
       } else {
         // Crear nuevo alumno
         const response = await fetch(
-          "https://control-de-tareas-backend-production.up.railway.app/api/alumno/",
+          `${API_URL}alumno/`,
           {
             method: "POST",
             headers: {
@@ -172,7 +173,7 @@ const Page = () => {
   const manejarEliminarAlumno = async (id) => {
     try {
       const response = await fetch(
-        `https://control-de-tareas-backend-production.up.railway.app/api/alumno/${id}`,
+        `${API_URL}alumno/${id}`,
         {
           method: "DELETE",
         }

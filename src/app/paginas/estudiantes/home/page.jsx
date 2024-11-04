@@ -14,7 +14,7 @@ import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
 import { getUser } from '@/services/auth';
 
-const API_URL = "https://control-de-tareas-backend-production.up.railway.app/api";
+const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
 
 export default function Home() {
   const [asignaturas, setAsignaturas] = useState([]);
