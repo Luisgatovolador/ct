@@ -266,6 +266,9 @@ function Page() {
       <Typography variant="body2">
         Fin: {selectedActividad ? new Date(selectedActividad.fechaFin).toLocaleDateString() : ""}
       </Typography>
+
+    
+      
       
       {/* Mensaje si la actividad está fuera de plazo */}
       {selectedActividad && new Date(selectedActividad.fechaFin) < new Date() ? (
@@ -277,9 +280,13 @@ function Page() {
       {/* Mostrar el archivo si existe */}
       {selectedActividad && selectedActividad.archivo && (
         <Box sx={{ marginTop: 2 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
+        Unidad: {selectedActividad.unidad}
+      </Typography>
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
             Archivo:
           </Typography>
+
           <Typography variant="body2">
             <DescriptionIcon sx={{ marginRight: 1 }} />
             {selectedActividad.archivo}

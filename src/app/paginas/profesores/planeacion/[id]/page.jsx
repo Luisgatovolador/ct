@@ -12,7 +12,9 @@ import {
   Button,
   Modal,
   TextField,
-  InputLabel
+  InputLabel,
+  Select,
+  MenuItem
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "@/components/Navbars/navbarprofesores/navbar";
@@ -37,6 +39,7 @@ function Page() {
     fechaInicio: "",
     archivo: null,
     fechaFin: "",
+    unidad: "",
     planeacionID: id,
   });
   const [actividadSeleccionada, setActividadSeleccionada] = useState(null);
@@ -108,6 +111,7 @@ function Page() {
     formData.append("fechaInicio", nuevaActividad.fechaInicio);
     formData.append("fechaFin", nuevaActividad.fechaFin);
     formData.append("planeacionID", nuevaActividad.planeacionID);
+    formData.append("unidad", nuevaActividad.unidad);
     if (nuevaActividad.archivo) {
       formData.append("archivo", nuevaActividad.archivo);
     }
@@ -137,12 +141,12 @@ const enviarCorreosAEstudiantes = async () => {
     const response = await fetch(`${API_URL}/alumno`);
     const alumnos = await response.json();
 
-    // Filtra los alumnos que tienen la planeación específica
+    // alumnos inscritos
     const alumnosAsignados = alumnos.filter((alumno) =>
-      alumno.planeacionID.includes(id) // Asegúrate de que `id` es el ID de la planeación actual
+      alumno.planeacionID.includes(id)
     );
 
-    // Crea un arreglo de promesas para enviar correos en paralelo
+   
     const envioCorreos = alumnosAsignados.map(alumno =>
       fetch(`${API_URL}/mandarCorreo`, {
         method: 'POST',
@@ -150,15 +154,14 @@ const enviarCorreosAEstudiantes = async () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          correo: alumno.email, // Asegúrate de usar el campo `email` correcto
+          correo: alumno.email, 
           asunto: "Nueva actividad disponible",
           mensaje: `Se ha añadido una nueva actividad a la asignatura ${planeacion.nombre}`,
         }),
       })
     );
 
-    // Espera a que todas las promesas se resuelvan
-    await Promise.all(envioCorreos);
+    
     console.log("Correos enviados a todos los estudiantes inscritos.");
     
   } catch (error) {
@@ -182,6 +185,7 @@ const enviarCorreosAEstudiantes = async () => {
       formData.append("descripcion", actividadSeleccionada.descripcion);
       formData.append("fechaInicio", actividadSeleccionada.fechaInicio);
       formData.append("fechaFin", actividadSeleccionada.fechaFin);
+      formData.append("unidad", actividadSeleccionada.unidad);
 
       try {
         const response = await fetch(
@@ -226,6 +230,15 @@ const enviarCorreosAEstudiantes = async () => {
     }
   };
 
+ // actividades por unidad
+  const actividadesPorUnidad = actividades.reduce((acc, actividad) => {
+   
+    const unidad = actividad.unidad || "Sin unidad";
+    if (!acc[unidad]) acc[unidad] = [];
+    acc[unidad].push(actividad);
+    return acc;
+  }, {});
+
   return (
     <>
       <Navbar />
@@ -241,123 +254,124 @@ const enviarCorreosAEstudiantes = async () => {
           <br />
 
           <Paper elevation={3} sx={{ padding: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={8}>
-                <Box sx={{ padding: 2 }}>
-                  <Box
+  <Grid container spacing={2}>
+    <Grid item xs={12} md={8}>
+      <Box sx={{ padding: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 2,
+          }}
+        >
+          <Typography variant="h4" component="h2" gutterBottom>
+            Actividades Creadas
+          </Typography>
+        </Box>
+
+        {/* Iteramos sobre cada unidad para mostrar las actividades agrupadas */}
+        {Object.keys(actividadesPorUnidad).map((unidad) => (
+          <Box key={unidad} sx={{ marginBottom: 4 }}>
+            <Typography variant="h5" color="primary" sx={{ marginBottom: 2 }}>
+              Unidad {unidad}
+            </Typography>
+
+            {actividadesPorUnidad[unidad].map((actividad, index) => (
+              <Accordion key={index}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls={`panel${index}-content`}
+                  id={`panel${index}-header`}
+                >
+                  <Typography variant="h6" color="textPrimary">
+                    {actividad.titulo}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails
+                  sx={{
+                    backgroundColor: "#f0f0f0",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <Typography
+                    variant="body1"
                     sx={{
                       display: "flex",
-                      justifyContent: "space-between",
                       alignItems: "center",
-                      marginBottom: 2,
+                      marginBottom: 1,
                     }}
                   >
-                    <Typography variant="h4" component="h2" gutterBottom>
-                      Actividades Creadas 
+                    <DateRangeIcon sx={{ marginRight: 1 }} />
+                    Fecha de inicio: {actividad.fechaInicio}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: 1,
+                    }}
+                  >
+                    <DateRangeIcon sx={{ marginRight: 1 }} />
+                    Fecha de entrega: {actividad.fechaFin}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: 1,
+                    }}
+                  >
+                    <DescriptionIcon sx={{ marginRight: 1 }} />
+                    Descripción: {actividad.descripcion}
+                  </Typography>
+                  {actividad.archivo && (
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 1,
+                      }}
+                    >
+                      <DescriptionIcon sx={{ marginRight: 1 }} />
+                      Archivo:
+                      <a href={`${API_URL_PA_IMAGENES}${actividad.archivo}`} target="_blank" rel="noopener noreferrer">
+                        <img src="/fileImg.png" alt="Archivo" width={50} style={{ marginLeft: 8 }} />
+                      </a>
                     </Typography>
+                  )}
+                  
+                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Link href={`/paginas/profesores/actividad/${actividad._id}`}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ marginRight: 1 }}
+                      >
+                        Ver Más
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="secondary"
+                      onClick={() => manejarEditarActividad(actividad)}
+                    >
+                      Editar
+                    </Button>
                   </Box>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Box>
+        ))}
+      </Box>
+    </Grid>
+ 
 
-                  {actividades.map((actividad, index) => (
-                    <Accordion key={index}>
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls={`panel${index}-content`}
-                        id={`panel${index}-header`}
-                      >
-                        <Typography variant="h6" color="textPrimary">
-                          {actividad.titulo}
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails
-                        sx={{
-                          backgroundColor: "#f0f0f0",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 1,
-                          }}
-                        >
-                          <DateRangeIcon sx={{ marginRight: 1 }} />
-                          Fecha de inicio: {actividad.fechaInicio}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 1,
-                          }}
-                        >
-                          <DateRangeIcon sx={{ marginRight: 1 }} />
-                          Fecha de entrega: {actividad.fechaFin}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 1,
-                          }}
-                        >
-                          <DescriptionIcon sx={{ marginRight: 1 }} />
-                          Descripción: {actividad.descripcion}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 1,
-                          }}
-                        >
-                          <Typography
-                          variant="body1"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 1,
-                          }}
-                        >
-                          <DescriptionIcon sx={{ marginRight: 1 }} />
-                          Archivo : {actividad.archivo}
-                        </Typography>
-                          {actividad.archivo && (
-                              <a href={`${API_URL_PA_IMAGENES}${actividad.archivo}`} target="_blank" rel="noopener noreferrer">
-                                <img src="/fileImg.png" alt="Archivo" width={50} />
-                              </a>
-                            )}
-                          
-                        </Typography>
-                        
-                        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                          <Link href={`/paginas/profesores/actividad/${actividad._id}`}>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              sx={{ marginRight: 1 }}
-                            >
-                              Ver Más
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            color="secondary"
-                            onClick={() => manejarEditarActividad(actividad)}
-                          >
-                            Editar
-                          </Button>
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
-                </Box>
-              </Grid>
 
               <Grid item xs={12} md={4}>
                 <Paper
@@ -426,6 +440,28 @@ const enviarCorreosAEstudiantes = async () => {
             }
             sx={{ marginBottom: 2 }}
           />
+
+          <InputLabel>Unidad</InputLabel>
+          <Select
+            label="Unidad"
+            fullWidth
+            value={actividadSeleccionada ? actividadSeleccionada.unidad : nuevaActividad.unidad}
+            onChange={(e) =>
+              actividadSeleccionada
+                ? setActividadSeleccionada({ ...actividadSeleccionada, unidad: e.target.value })
+                : setNuevaActividad({ ...nuevaActividad, unidad: e.target.value })
+            }
+            sx={{ marginBottom: 2 }}
+          >
+            <MenuItem value="1">Unidad 1</MenuItem>
+            <MenuItem value="2">Unidad 2</MenuItem>
+            <MenuItem value="3">Unidad 3</MenuItem>
+            <MenuItem value="4">Unidad 4</MenuItem>
+            <MenuItem value="5">Unidad 5</MenuItem>
+          </Select>
+         
+
+          
           <InputLabel htmlFor="fechaInicio">Fecha de Inicio</InputLabel>
           <TextField
             type="date"
