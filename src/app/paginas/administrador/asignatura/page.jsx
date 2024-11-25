@@ -23,7 +23,7 @@ const Page = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+  const API_URL = "http:localhost:3001/api/";
 
   useEffect(() => {
     const fetchAreas = async () => {

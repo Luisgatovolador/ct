@@ -19,8 +19,8 @@ import { useParams } from "next/navigation";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DescriptionIcon from "@mui/icons-material/Description";
 
-const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
-const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production-222f.up.railway.app/uploads/";
+const API_URL = "http:localhost:3001/api";
+const API_URL_PA_IMAGENES = "http:localhost:3001/uploads/";
 
 function Page() {
   const [planeacion, setPlaneacion] = useState(null);

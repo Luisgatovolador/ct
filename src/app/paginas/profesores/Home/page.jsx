@@ -25,9 +25,7 @@ export default function Home() {
   useEffect(() => {
     const Asignaturas = async () => {
       try {
-        const response = await fetch(
-          "https://control-de-tareas-backend-production-222f.up.railway.app/api/asignatura/"
-        );
+        const response = await fetch("http:localhost:3001/api/asignatura/");
         const data = await response.json();
         setAsignatura(data);
       } catch (error) {

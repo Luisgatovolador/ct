@@ -28,7 +28,7 @@ const Page = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const planeacionesPorPagina = 5;
   
-  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+  const API_URL = "http:localhost:3001/api/";
   
   // Obtener planeaciones desde la API
   useEffect(() => {

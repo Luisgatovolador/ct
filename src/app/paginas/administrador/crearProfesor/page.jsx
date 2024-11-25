@@ -35,7 +35,7 @@ const Page = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const profesoresPorPagina = 4;
 
-  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+  const API_URL = "http:localhost:3001/api/";
   const [nuevoProfesor, setNuevoProfesor] = useState({
     nombre: "",
     email: "",

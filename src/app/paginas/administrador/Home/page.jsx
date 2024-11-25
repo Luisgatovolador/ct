@@ -14,7 +14,7 @@ import Footer from "@/components/footer/footer";
 import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
 
-const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+const API_URL = "http:localhost:3001/api/";
 
 export default function Home() {
   const [asignatura, setAsignatura] = React.useState([]);
