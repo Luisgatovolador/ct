@@ -62,12 +62,15 @@ export default function SignIn() {
       if (res.ok) {
         saveToken(data.token);
         saveUser(data.user);
+        
 
         if (data.user.rol === "Alumno") {
+          
           router.push("/paginas/estudiantes/home");
         }
         if (data.user.rol==="Profesor"){
-          router.push("/paginas/profesores/home");
+         router.push("/paginas/profesores/home");
+         
         }
         if (data.user.rol==="Administrador"){
           router.push("/paginas/administrador/home");

@@ -22,6 +22,10 @@ export default function Home() {
   const [userData, setUserData] = useState(null);
   const [planeaciones, setPlaneaciones] = useState([]);
 
+  const usuario = getUser();
+console.log(usuario); // Esto mostrará "672803f779d2fd675026425f"
+
+
   useEffect(() => {
     const fetchedUser = getUser();
     if (fetchedUser) {
