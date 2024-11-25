@@ -53,13 +53,13 @@ function Page() {
   const [ModalCrearActividadConjunto, setModalCrearActividadConjunto] = useState(false);
   const [userData, setUserData] = useState(null);
   const [idAsignatura, SetidAsignatura] = useState(null);
-  const [modalAbiertoCrearActividadConjunto, setModalAbiertoCrearActividadConjunto] = useState(false);
   // Obtener la planeación 
   useEffect(() => {
     const obtenerPlaneacion = async () => {
       const user = getUser()
       if (user) {
         setUserData(user)
+        console.log(user)
       }
       if (id) {
         try {
@@ -427,7 +427,7 @@ function Page() {
       <ModalCrearActividad
         abierto={ModalCrearActividadConjunto}
         asignaturaId={idAsignatura}
-        profesorId={userData}
+        profesorId={userData.id}
         onCerrar={() => setModalCrearActividadConjunto(false)}
       />
 

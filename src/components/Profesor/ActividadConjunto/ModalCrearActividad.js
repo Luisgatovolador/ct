@@ -42,9 +42,9 @@ const ModalCrearActividad = ({ abierto, onCerrar, asignaturaId, profesorId }) =>
   };
 
   const manejarGuardarActividad = async () => {
+    console.log(actividad)
     if (!actividad.nombre || !actividad.descripcion || !actividad.profesorId || !actividad.asignaturaId) {
       alert("Todos los campos son obligatorios.");
-      console.log(actividad)
       return;
     }
 
