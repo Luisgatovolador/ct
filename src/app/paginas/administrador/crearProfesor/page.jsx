@@ -34,8 +34,7 @@ const Page = () => {
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const profesoresPorPagina = 4;
-
-  const API_URL = "http:localhost:3001/api/";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
   const [nuevoProfesor, setNuevoProfesor] = useState({
     nombre: "",
     email: "",

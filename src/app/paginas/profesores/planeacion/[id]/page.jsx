@@ -1,21 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Button,
-  Modal,
-  TextField,
-  InputLabel,
-  Select,
-  MenuItem
-} from "@mui/material";
+import { Box, Grid, Paper, Typography, Accordion, AccordionSummary, AccordionDetails, Button, Modal, TextField, InputLabel, Select, MenuItem } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "@/components/Navbars/navbarprofesores/navbar";
 import Footer from "@/components/footer/footer";
@@ -23,9 +9,13 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DescriptionIcon from "@mui/icons-material/Description";
+import ModalCrearActividad from "@/components/Profesor/ActividadConjunto/ModalCrearActividad";
+import { getUser } from "@/services/auth";
+import ListaActividadesConjuntas from "@/components/Profesor/ListarActividadesConjunto/ListaActividades";
+import ListaActividadesConjuntasCreadas from "@/components/Profesor/ListarActividadesCreadas/ListarActividades";
 
-const API_URL = "http:localhost:3001/api";
-const API_URL_PA_IMAGENES = "http:localhost:3001/uploads/";
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_URL_PA_IMAGENES = "http://localhost:3001/uploads/";
 
 function Page() {
   const [planeacion, setPlaneacion] = useState(null);
@@ -60,10 +50,17 @@ function Page() {
     boxShadow: 24,
     p: 4,
   };
-
+  const [ModalCrearActividadConjunto, setModalCrearActividadConjunto] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [idAsignatura, SetidAsignatura] = useState(null);
+  const [modalAbiertoCrearActividadConjunto, setModalAbiertoCrearActividadConjunto] = useState(false);
   // Obtener la planeación 
   useEffect(() => {
     const obtenerPlaneacion = async () => {
+      const user = getUser()
+      if (user) {
+        setUserData(user)
+      }
       if (id) {
         try {
           const response = await fetch(
@@ -76,6 +73,7 @@ function Page() {
             fechaComienzo: data.fechaComienzo.split("T")[0],
             fechaFin: data.fechaFin.split("T")[0],
           });
+          SetidAsignatura(data.asignatura)
         } catch (error) {
           console.error("Error al obtener la planeación:", error);
         }
@@ -169,8 +167,6 @@ function Page() {
     }
   };
 
-
-
   // Función para editar una actividad seleccionada
   const manejarEditarActividad = (actividad) => {
     setActividadSeleccionada(actividad);
@@ -237,6 +233,12 @@ function Page() {
     acc[unidad].push(actividad);
     return acc;
   }, {});
+
+  if (!userData || !idAsignatura) {
+    return (
+      <p>Cargando...</p>
+    )
+  }
 
   return (
     <>
@@ -395,6 +397,15 @@ function Page() {
                   </Button>
 
                   <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setModalCrearActividadConjunto(true)}
+                    sx={{ marginTop: 2 }}
+                  >
+                    Agregar Actividad en Conjunto
+                  </Button>
+
+                  <Button
                     variant="outlined"
                     color="primary"
                     onClick={() => setModalPlaneacionAbierto(true)}
@@ -405,9 +416,20 @@ function Page() {
                 </Paper>
               </Grid>
             </Grid>
+            <ListaActividadesConjuntasCreadas idProfesor={userData.id} />
+            <ListaActividadesConjuntas idProfesor={userData.id}/>
           </Paper>
         </div>
+      
       </Box>
+
+              
+      <ModalCrearActividad
+        abierto={ModalCrearActividadConjunto}
+        asignaturaId={idAsignatura}
+        profesorId={userData}
+        onCerrar={() => setModalCrearActividadConjunto(false)}
+      />
 
       {/* Modal para agregar o editar actividad */}
       <Modal open={modalAbierto} onClose={() => setModalAbierto(false)}>
