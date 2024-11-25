@@ -24,8 +24,8 @@ import { useParams } from "next/navigation";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DescriptionIcon from "@mui/icons-material/Description";
 
-const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
-const API_URL_PA_IMAGENES = "https://control-de-tareas-backend-production-222f.up.railway.app/uploads/";
+const API_URL = "http:localhost:3001/api";
+const API_URL_PA_IMAGENES = "http:localhost:3001/uploads/";
 
 function Page() {
   const [planeacion, setPlaneacion] = useState(null);
@@ -134,40 +134,40 @@ function Page() {
       console.error("Error al agregar la actividad:", error);
     }
   };
-  
+
   // Enviar correos a estudiantes
-const enviarCorreosAEstudiantes = async () => {
-  try {
-    const response = await fetch(`${API_URL}/alumno`);
-    const alumnos = await response.json();
+  const enviarCorreosAEstudiantes = async () => {
+    try {
+      const response = await fetch(`${API_URL}/alumno`);
+      const alumnos = await response.json();
 
-    // alumnos inscritos
-    const alumnosAsignados = alumnos.filter((alumno) =>
-      alumno.planeacionID.includes(id)
-    );
+      // alumnos inscritos
+      const alumnosAsignados = alumnos.filter((alumno) =>
+        alumno.planeacionID.includes(id)
+      );
 
-   
-    const envioCorreos = alumnosAsignados.map(alumno =>
-      fetch(`${API_URL}/mandarCorreo`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          correo: alumno.email, 
-          asunto: "Nueva actividad disponible",
-          mensaje: `Se ha añadido una nueva actividad a la asignatura ${planeacion.nombre}`,
-        }),
-      })
-    );
 
-    
-    console.log("Correos enviados a todos los estudiantes inscritos.");
-    
-  } catch (error) {
-    console.error("Error al enviar los correos:", error);
-  }
-};
+      const envioCorreos = alumnosAsignados.map(alumno =>
+        fetch(`${API_URL}/mandarCorreo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            correo: alumno.email,
+            asunto: "Nueva actividad disponible",
+            mensaje: `Se ha añadido una nueva actividad a la asignatura ${planeacion.nombre}`,
+          }),
+        })
+      );
+
+
+      console.log("Correos enviados a todos los estudiantes inscritos.");
+
+    } catch (error) {
+      console.error("Error al enviar los correos:", error);
+    }
+  };
 
 
 
@@ -230,9 +230,8 @@ const enviarCorreosAEstudiantes = async () => {
     }
   };
 
- // actividades por unidad
+  // actividades por unidad
   const actividadesPorUnidad = actividades.reduce((acc, actividad) => {
-   
     const unidad = actividad.unidad || "Sin unidad";
     if (!acc[unidad]) acc[unidad] = [];
     acc[unidad].push(actividad);
@@ -249,128 +248,128 @@ const enviarCorreosAEstudiantes = async () => {
             <Typography variant="h6" component="h3">
               {planeacion ? planeacion.nombre : "Cargando planeación..."}
             </Typography>
-           
+
           </Paper>
           <br />
 
           <Paper elevation={3} sx={{ padding: 2 }}>
-  <Grid container spacing={2}>
-    <Grid item xs={12} md={8}>
-      <Box sx={{ padding: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 2,
-          }}
-        >
-          <Typography variant="h4" component="h2" gutterBottom>
-            Actividades Creadas
-          </Typography>
-        </Box>
-
-        {/* Iteramos sobre cada unidad para mostrar las actividades agrupadas */}
-        {Object.keys(actividadesPorUnidad).map((unidad) => (
-          <Box key={unidad} sx={{ marginBottom: 4 }}>
-            <Typography variant="h5" color="primary" sx={{ marginBottom: 2 }}>
-              Unidad {unidad}
-            </Typography>
-
-            {actividadesPorUnidad[unidad].map((actividad, index) => (
-              <Accordion key={index}>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls={`panel${index}-content`}
-                  id={`panel${index}-header`}
-                >
-                  <Typography variant="h6" color="textPrimary">
-                    {actividad.titulo}
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails
-                  sx={{
-                    backgroundColor: "#f0f0f0",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={8}>
+                <Box sx={{ padding: 2 }}>
+                  <Box
                     sx={{
                       display: "flex",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      marginBottom: 1,
+                      marginBottom: 2,
                     }}
                   >
-                    <DateRangeIcon sx={{ marginRight: 1 }} />
-                    Fecha de inicio: {actividad.fechaInicio}
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: 1,
-                    }}
-                  >
-                    <DateRangeIcon sx={{ marginRight: 1 }} />
-                    Fecha de entrega: {actividad.fechaFin}
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: 1,
-                    }}
-                  >
-                    <DescriptionIcon sx={{ marginRight: 1 }} />
-                    Descripción: {actividad.descripcion}
-                  </Typography>
-                  {actividad.archivo && (
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginBottom: 1,
-                      }}
-                    >
-                      <DescriptionIcon sx={{ marginRight: 1 }} />
-                      Archivo:
-                      <a href={`${API_URL_PA_IMAGENES}${actividad.archivo}`} target="_blank" rel="noopener noreferrer">
-                        <img src="/fileImg.png" alt="Archivo" width={50} style={{ marginLeft: 8 }} />
-                      </a>
+                    <Typography variant="h4" component="h2" gutterBottom>
+                      Actividades Creadas
                     </Typography>
-                  )}
-                  
-                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Link href={`/paginas/profesores/actividad/${actividad._id}`}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        sx={{ marginRight: 1 }}
-                      >
-                        Ver Más
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="secondary"
-                      onClick={() => manejarEditarActividad(actividad)}
-                    >
-                      Editar
-                    </Button>
                   </Box>
-                </AccordionDetails>
-              </Accordion>
-            ))}
-          </Box>
-        ))}
-      </Box>
-    </Grid>
- 
+
+                  {/* Iteramos sobre cada unidad para mostrar las actividades agrupadas */}
+                  {Object.keys(actividadesPorUnidad).map((unidad) => (
+                    <Box key={unidad} sx={{ marginBottom: 4 }}>
+                      <Typography variant="h5" color="primary" sx={{ marginBottom: 2 }}>
+                        Unidad {unidad}
+                      </Typography>
+
+                      {actividadesPorUnidad[unidad].map((actividad, index) => (
+                        <Accordion key={index}>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls={`panel${index}-content`}
+                            id={`panel${index}-header`}
+                          >
+                            <Typography variant="h6" color="textPrimary">
+                              {actividad.titulo}
+                            </Typography>
+                          </AccordionSummary>
+                          <AccordionDetails
+                            sx={{
+                              backgroundColor: "#f0f0f0",
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: 1,
+                              }}
+                            >
+                              <DateRangeIcon sx={{ marginRight: 1 }} />
+                              Fecha de inicio: {actividad.fechaInicio}
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: 1,
+                              }}
+                            >
+                              <DateRangeIcon sx={{ marginRight: 1 }} />
+                              Fecha de entrega: {actividad.fechaFin}
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: 1,
+                              }}
+                            >
+                              <DescriptionIcon sx={{ marginRight: 1 }} />
+                              Descripción: {actividad.descripcion}
+                            </Typography>
+                            {actividad.archivo && (
+                              <Typography
+                                variant="body1"
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  marginBottom: 1,
+                                }}
+                              >
+                                <DescriptionIcon sx={{ marginRight: 1 }} />
+                                Archivo:
+                                <a href={`${API_URL_PA_IMAGENES}${actividad.archivo}`} target="_blank" rel="noopener noreferrer">
+                                  <img src="/fileImg.png" alt="Archivo" width={50} style={{ marginLeft: 8 }} />
+                                </a>
+                              </Typography>
+                            )}
+
+                            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                              <Link href={`/paginas/profesores/actividad/${actividad._id}`}>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  sx={{ marginRight: 1 }}
+                                >
+                                  Ver Más
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                color="secondary"
+                                onClick={() => manejarEditarActividad(actividad)}
+                              >
+                                Editar
+                              </Button>
+                            </Box>
+                          </AccordionDetails>
+                        </Accordion>
+                      ))}
+                    </Box>
+                  ))}
+                </Box>
+              </Grid>
+
 
 
               <Grid item xs={12} md={4}>
@@ -380,7 +379,7 @@ const enviarCorreosAEstudiantes = async () => {
                     padding: 2,
                     display: "flex",
                     flexDirection: "column",
-                    
+
                     height: "100%",
                   }}
                 >
@@ -396,13 +395,13 @@ const enviarCorreosAEstudiantes = async () => {
                   </Button>
 
                   <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => setModalPlaneacionAbierto(true)}
-              sx={{ marginTop: 2 }}
-            >
-              Modificar Planeación
-            </Button>
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setModalPlaneacionAbierto(true)}
+                    sx={{ marginTop: 2 }}
+                  >
+                    Modificar Planeación
+                  </Button>
                 </Paper>
               </Grid>
             </Grid>
@@ -459,9 +458,9 @@ const enviarCorreosAEstudiantes = async () => {
             <MenuItem value="4">Unidad 4</MenuItem>
             <MenuItem value="5">Unidad 5</MenuItem>
           </Select>
-         
 
-          
+
+
           <InputLabel htmlFor="fechaInicio">Fecha de Inicio</InputLabel>
           <TextField
             type="date"

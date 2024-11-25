@@ -23,10 +23,9 @@ import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import { useParams } from "next/navigation";
 
-const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
+const API_URL = "http:localhost:3001/api";
 
-const API_URL_PA_IMAGENES =
-  "https://control-de-tareas-backend-production-222f.up.railway.app/uploads/";
+const API_URL_PA_IMAGENES = "http:localhost:3001/uploads/";
 
 const Page = () => {
   const [busquedaAlumno, setBusquedaAlumno] = useState("");

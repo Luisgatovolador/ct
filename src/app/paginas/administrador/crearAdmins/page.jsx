@@ -33,7 +33,7 @@ const Page = () => {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [administradorAEditar, setAdministradorAEditar] = useState(null);
   
-  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+  const API_URL = "http:localhost:3001/api/";
   // Obtener los administradores del backend
   useEffect(() => {
     const fetchAdministradores = async () => {

@@ -42,7 +42,7 @@ const Page = () => {
   });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [alumnoAEditar, setAlumnoAEditar] = useState(null);
-  const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api/";
+  const API_URL = "http:localhost:3001/api/";
   
   useEffect(() => {
     const fetchRoles = async () => {

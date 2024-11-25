@@ -19,7 +19,7 @@ import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import { getUser } from "@/services/auth";
 
-const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
+const API_URL = "http:localhost:3001/api";
 
 // calendario en español
 const locales = {
