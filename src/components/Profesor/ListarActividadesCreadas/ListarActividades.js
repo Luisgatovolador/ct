@@ -1,5 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Button, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import {
+    Box,
+    Typography,
+    Button,
+    CircularProgress,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+} from "@mui/material";
 import AgregarProfesorAActividadModal from "../AgregarProfesorAActividad/AgregarProfesorAActividad";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -10,7 +22,7 @@ const ListaActividadesConjuntasCreadas = ({ idProfesor }) => {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [actividadSeleccionada, setActividadSeleccionada] = useState(null); // Guardamos la actividad seleccionada para pasarla al modal
+    const [actividadSeleccionada, setActividadSeleccionada] = useState(null);
 
     const abrirModal = (actividadId) => {
         setActividadSeleccionada(actividadId);
@@ -20,7 +32,7 @@ const ListaActividadesConjuntasCreadas = ({ idProfesor }) => {
     const cerrarModal = () => {
         setModalAbierto(false);
         setActividadSeleccionada(null);
-        obtenerActividades(); // Recargar las actividades después de asignar un profesor
+        obtenerActividades();
     };
 
     const obtenerProfesores = async () => {
@@ -30,7 +42,7 @@ const ListaActividadesConjuntasCreadas = ({ idProfesor }) => {
                 throw new Error("Error al obtener la lista de profesores");
             }
             const datos = await respuesta.json();
-            setProfesores(datos); // Guardamos los datos de los profesores
+            setProfesores(datos);
         } catch (error) {
             console.error("Error al obtener profesores:", error);
             setError(error.message);
@@ -53,13 +65,31 @@ const ListaActividadesConjuntasCreadas = ({ idProfesor }) => {
         }
     };
 
+    const eliminarActividad = async (actividadId) => {
+        try {
+            const respuesta = await fetch(`${API_URL}/actividad-conjunto/delete/${actividadId}`, {
+                method: "DELETE",
+            });
+            if (!respuesta.ok) {
+                throw new Error("Error al eliminar la actividad");
+            }
+            // Filtrar las actividades eliminadas
+            setActividades((prevActividades) =>
+                prevActividades.filter((actividad) => actividad._id !== actividadId)
+            );
+        } catch (error) {
+            console.error("Error al eliminar la actividad:", error);
+            alert("Ocurrió un error al intentar eliminar la actividad.");
+        }
+    };
+
     useEffect(() => {
         obtenerActividades();
         obtenerProfesores();
     }, []);
 
     const obtenerProfesorPorId = (profesorId) => {
-        return profesores.find(profesor => profesor._id === profesorId);
+        return profesores.find((profesor) => profesor._id === profesorId);
     };
 
     if (cargando) {
@@ -112,38 +142,21 @@ const ListaActividadesConjuntasCreadas = ({ idProfesor }) => {
                     <Typography variant="body2">Creador: {actividad.profesorCreador?.nombre}</Typography>
                     <Typography variant="body2">Asignatura: {actividad.asignatura?._id}</Typography>
 
-                    {/* Mostrar profesores asignados */}
-                    <Typography variant="subtitle1" sx={{ mt: 2 }}>Profesores Asignados:</Typography>
-                    {actividad.profesores && actividad.profesores.length > 0 ? (
-                        <TableContainer component={Paper} sx={{ mt: 2 }}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Profesor</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {actividad.profesores.map((profesorId) => {
-                                        const profesor = obtenerProfesorPorId(profesorId);
-                                        return (
-                                            <TableRow key={profesorId}>
-                                                <TableCell>{profesor ? profesor.nombre : "Profesor no encontrado"}</TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    ) : (
-                        <Typography variant="body2">No hay profesores asignados aún.</Typography>
-                    )}
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => eliminarActividad(actividad._id)}
+                        sx={{ marginTop: 2 }}
+                    >
+                        Eliminar Actividad
+                    </Button>
 
                     <div>
-                        <Button 
-                            variant="contained" 
-                            color="primary" 
+                        <Button
+                            variant="contained"
+                            color="primary"
                             onClick={() => abrirModal(actividad._id)}
-                            sx={{marginTop: 2}}    
+                            sx={{ marginTop: 2 }}
                         >
                             Asignar Profesor
                         </Button>
@@ -154,44 +167,6 @@ const ListaActividadesConjuntasCreadas = ({ idProfesor }) => {
                             cerrarModal={cerrarModal}
                         />
                     </div>
-
-                    <Typography variant="subtitle1" sx={{ mt: 2 }}>Tareas:</Typography>
-                    {actividad.tareas.length > 0 ? (
-                        <TableContainer component={Paper} sx={{ mt: 2 }}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Alumno</TableCell>
-                                        <TableCell>Archivo</TableCell>
-                                        <TableCell>Fecha de Subida</TableCell>
-                                        <TableCell>Calificación Promedio</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {actividad.tareas.map((tarea) => (
-                                        <TableRow key={tarea._id}>
-                                            <TableCell>{tarea.alumno?.nombre || "No disponible"}</TableCell>
-                                            <TableCell>
-                                                {tarea.archivo ? (
-                                                    <Button href={tarea.archivo} target="_blank" rel="noopener noreferrer" variant="outlined">
-                                                        Ver Archivo
-                                                    </Button>
-                                                ) : (
-                                                    "No enviado"
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(tarea.fechaSubida).toLocaleDateString("es-ES") || "N/A"}
-                                            </TableCell>
-                                            <TableCell>{tarea.calificacionPromedio || "No calificado"}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    ) : (
-                        <Typography variant="body2">No hay tareas disponibles.</Typography>
-                    )}
                 </Box>
             ))}
         </Box>

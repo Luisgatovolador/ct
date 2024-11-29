@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Button, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import CalificarTareaModal from "../CalificarTareaModal/CalificarTareaModal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
+/*
+abierto={modalAbierto}
+        cerrarModal={() => setModalAbierto(false)}
+        actividadId={actividadSeleccionada}
+        tareaId={tareaSeleccionada?._id}
+        profesorId={idProfesor}
+        onCalificacionCompletada={refrescarVista}
+        estudianteId={}
+*/
 const ListaActividadesConjuntas = ({ idProfesor }) => {
   const [actividades, setActividades] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [actividadSeleccionada, setActividadSeleccionada] = useState(null);
+  const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
+  const [alumnoId, setAlumnoId] = useState(null);
 
   const obtenerActividades = async () => {
     try {
@@ -27,6 +40,18 @@ const ListaActividadesConjuntas = ({ idProfesor }) => {
   useEffect(() => {
     obtenerActividades();
   }, []);
+
+  const abrirModal = (actividadId, tarea, alumnoId) => {
+    setActividadSeleccionada(actividadId);
+    setTareaSeleccionada(tarea);
+    setModalAbierto(true);
+    setAlumnoId(alumnoId)
+  };
+
+  const refrescarVista = () => {
+    setModalAbierto(false);
+    obtenerActividades();
+  };
 
   if (cargando) {
     return (
@@ -77,7 +102,7 @@ const ListaActividadesConjuntas = ({ idProfesor }) => {
           <Typography variant="body1">Descripción: {actividad.descripcion}</Typography>
           <Typography variant="body2">Creador: {actividad.profesorCreador?.nombre}</Typography>
           <Typography variant="body2">Asignatura: {actividad.asignatura?._id}</Typography>
-          
+
           <Typography variant="subtitle1" sx={{ mt: 2 }}>Tareas:</Typography>
           {actividad.tareas.length > 0 ? (
             <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -88,6 +113,7 @@ const ListaActividadesConjuntas = ({ idProfesor }) => {
                     <TableCell>Archivo</TableCell>
                     <TableCell>Fecha de Subida</TableCell>
                     <TableCell>Calificación Promedio</TableCell>
+                    <TableCell>Calificar</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -96,7 +122,7 @@ const ListaActividadesConjuntas = ({ idProfesor }) => {
                       <TableCell>{tarea.alumno?.nombre || "No disponible"}</TableCell>
                       <TableCell>
                         {tarea.archivo ? (
-                          <Button href={tarea.archivo} target="_blank" rel="noopener noreferrer" variant="outlined">
+                          <Button href={`http://localhost:3001/uploads/${tarea.archivo}`} target="_blank" rel="noopener noreferrer" variant="outlined">
                             Ver Archivo
                           </Button>
                         ) : (
@@ -107,6 +133,16 @@ const ListaActividadesConjuntas = ({ idProfesor }) => {
                         {new Date(tarea.fechaSubida).toLocaleDateString("es-ES") || "N/A"}
                       </TableCell>
                       <TableCell>{tarea.calificacionPromedio || "No calificado"}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => abrirModal(actividad._id, tarea, tarea.alumno)}
+                          sx={{ marginTop: 2 }}
+                        >
+                          Calificar
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -117,6 +153,16 @@ const ListaActividadesConjuntas = ({ idProfesor }) => {
           )}
         </Box>
       ))}
+
+      <CalificarTareaModal
+        abierto={modalAbierto}
+        cerrarModal={() => setModalAbierto(false)}
+        actividadId={actividadSeleccionada}
+        tareaId={tareaSeleccionada?._id}
+        profesorId={idProfesor}
+        onCalificacionCompletada={refrescarVista}
+        estudianteId={alumnoId}
+      />
     </Box>
   );
 };

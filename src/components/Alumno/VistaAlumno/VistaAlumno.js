@@ -22,6 +22,7 @@ const VistaAlumno = ({ idAlumno, idAsignatura }) => {
     const [error, setError] = useState(null);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [actividadSeleccionada, setActividadSeleccionada] = useState(null);
+    const [profesor, setProfesor] = useState([]);
 
     const obtenerActividades = async () => {
         try {
@@ -38,8 +39,22 @@ const VistaAlumno = ({ idAlumno, idAsignatura }) => {
         }
     };
 
+    const fecthData = async () => {
+        try {
+            const respuesta = await fetch(`${API_URL}/profesor`);
+            if (!respuesta.ok) {
+                throw new Error("Error al obtener las actividades");
+            }
+            const datos = await respuesta.json();
+            setProfesor(datos);
+        } catch (error) {
+            setError("en vivo desde hermosillo sonora")
+        }
+    }
+
     useEffect(() => {
         obtenerActividades();
+        fecthData();
     }, [idAlumno, idAsignatura]);
 
     if (cargando) {
@@ -84,6 +99,14 @@ const VistaAlumno = ({ idAlumno, idAsignatura }) => {
                 >
                     <Typography variant="h6">{actividad.nombre}</Typography>
                     <Typography variant="body1">Descripción: {actividad.descripcion}</Typography>
+                    <Button
+                        href={`http://localhost:3001/uploads/${actividad.archivo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="outlined"
+                    >
+                        Ver Archivo
+                    </Button>
                     <Typography variant="body2">Profesor(es) asignado(s):</Typography>
                     {actividad.profesores && actividad.profesores.length > 0 ? (
                         <ul>
@@ -149,11 +172,15 @@ const VistaAlumno = ({ idAlumno, idAsignatura }) => {
                                                             <TableBody>
                                                                 {tarea.calificaciones.map((calificacion) => (
                                                                     <TableRow key={calificacion._id}>
-                                                                        <TableCell>{calificacion.profesor?.nombre || "Anónimo"}</TableCell>
+                                                                        <TableCell>
+                                                                            {profesor.find((p) => p._id === calificacion.profesor)?.nombre || "Anónimo"}
+                                                                        </TableCell>
+
                                                                         <TableCell>{calificacion.calificacion}</TableCell>
                                                                         <TableCell>{calificacion.retroalimentacion || "Sin comentarios"}</TableCell>
                                                                     </TableRow>
                                                                 ))}
+
                                                             </TableBody>
                                                         </Table>
                                                     ) : (
