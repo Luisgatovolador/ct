@@ -42,7 +42,8 @@ const Page = () => {
   });
   const [modoEdicion, setModoEdicion] = useState(false);
   const [alumnoAEditar, setAlumnoAEditar] = useState(null);
-  const API_URL = "http:localhost:3001/api/";
+  
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
   
   useEffect(() => {
     const fetchRoles = async () => {

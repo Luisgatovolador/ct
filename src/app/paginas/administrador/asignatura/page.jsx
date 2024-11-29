@@ -23,7 +23,7 @@ const Page = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const API_URL = "http:localhost:3001/api/";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
     const fetchAreas = async () => {

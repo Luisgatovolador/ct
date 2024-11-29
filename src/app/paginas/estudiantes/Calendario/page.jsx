@@ -20,7 +20,8 @@ import Footer from "@/components/footer/footer";
 import { getUser } from "@/services/auth";
 
 
-const URL_API = "http:localhost:3001/api";
+const URL_API = process.env.NEXT_PUBLIC_API_URL
+
 const URL_API_PARA_IMAGENES = "http:localhost:3001/uploads/";
 
 const localizaciones = {

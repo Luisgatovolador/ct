@@ -28,7 +28,7 @@ const Page = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const planeacionesPorPagina = 5;
   
-  const API_URL = "http:localhost:3001/api/";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
   
   // Obtener planeaciones desde la API
   useEffect(() => {

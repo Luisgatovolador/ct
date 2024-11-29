@@ -1,15 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
-import { Box, Typography, TextField, InputLabel, Button, Modal } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  InputLabel,
+  Button,
+  Modal,
+} from "@mui/material";
 
-const ModalCrearActividad = ({ abierto, asignaturaId, profesorId }) => {
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const ModalCrearActividad = ({ abierto, onCerrar, asignaturaId, profesorId }) => {
   const [actividad, setActividad] = useState({
     nombre: "",
     descripcion: "",
     profesorId: profesorId,
     asignaturaId: asignaturaId,
-    archivo: ""
+    archivo: null,
   });
 
   const estiloModal = {
@@ -19,84 +28,111 @@ const ModalCrearActividad = ({ abierto, asignaturaId, profesorId }) => {
     transform: "translate(-50%, -50%)",
     width: 400,
     bgcolor: "background.paper",
-    border: "2px solid #000",
     boxShadow: 24,
     p: 4,
+    borderRadius: "8px",
+  };
+
+  const manejarCambio = (e) => {
+    const { name, value, files } = e.target;
+    setActividad((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
   };
 
   const manejarGuardarActividad = async () => {
-    if (!actividad.actividadId || !actividad.estudianteId || !actividad.archivo) {
+    console.log(actividad)
+    if (!actividad.nombre || !actividad.descripcion || !actividad.profesorId || !actividad.asignaturaId) {
       alert("Todos los campos son obligatorios.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("actividadId", actividad.actividadId);
-    formData.append("estudianteId", actividad.estudianteId);
-    formData.append("archivo", actividad.archivo);
+    formData.append("nombre", actividad.nombre);
+    formData.append("descripcion", actividad.descripcion);
+    formData.append("profesorId", actividad.profesorId);
+    formData.append("asignaturaId", actividad.asignaturaId);
+    if (actividad.archivo) {
+      formData.append("archivo", actividad.archivo);
+    }
 
     try {
-      const respuesta = await fetch("http:localhost:3001/api/actividad/subir-tarea", {
+      const respuesta = await fetch(`${API_URL}/actividad-conjunto/crear`, {
         method: "POST",
         body: formData,
       });
 
-      if (!respuesta.ok) {
-        const error = await respuesta.json();
-        throw new Error(error.mensaje || "Error al subir la tarea.");
+      if (respuesta.ok) {
+        alert("Actividad creada con éxito.");
+        setActividad({
+          nombre: "",
+          descripcion: "",
+          profesorId: profesorId,
+          asignaturaId: asignaturaId,
+          archivo: null,
+        });
+        onCerrar();
+      } else {
+        alert("Error al crear la actividad.");
       }
-
-      const resultado = await respuesta.json();
-      console.log("Tarea subida exitosamente:", resultado);
-      alert("Tarea subida exitosamente.");
-      cerrarModal();
     } catch (error) {
-      console.error("Error al subir la tarea:", error.message);
-      alert("No se pudo subir la tarea: " + error.message);
+      console.error("Error al guardar la actividad:", error);
+      alert("Ocurrió un error al intentar guardar la actividad.");
     }
   };
 
   return (
-    <Modal open={abierto} onClose={cerrarModal}>
+    <Modal open={abierto} onClose={onCerrar}>
       <Box sx={estiloModal}>
-        <Typography variant="h6" component="h2" gutterBottom>
-          Subir Tarea
+        <Typography variant="h6" component="h2">
+          Crear Actividad
         </Typography>
-        <TextField
-          label="ID de Actividad"
-          variant="outlined"
-          fullWidth
-          value={actividad.actividadId}
-          onChange={(e) =>
-            setActividad({ ...actividad, actividadId: e.target.value })
-          }
-          sx={{ marginBottom: 2 }}
-        />
-        <TextField
-          label="ID de Estudiante"
-          variant="outlined"
-          fullWidth
-          value={actividad.estudianteId}
-          onChange={(e) =>
-            setActividad({ ...actividad, estudianteId: e.target.value })
-          }
-          sx={{ marginBottom: 2 }}
-        />
-        <InputLabel htmlFor="archivo">Archivo</InputLabel>
-        <input
-          type="file"
-          onChange={(e) =>
-            setActividad({ ...actividad, archivo: e.target.files[0] })
-          }
-          style={{ marginBottom: 16 }}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={manejarGuardarActividad}
+        <Box
+          component="form"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            mt: 2,
+          }}
         >
-          Subir Tarea
-        </Button>
+          <TextField
+            label="Nombre de la Actividad"
+            name="nombre"
+            value={actividad.nombre}
+            onChange={manejarCambio}
+            fullWidth
+          />
+          <TextField
+            label="Descripción"
+            name="descripcion"
+            value={actividad.descripcion}
+            onChange={manejarCambio}
+            multiline
+            rows={4}
+            fullWidth
+          />
+          <InputLabel htmlFor="archivo">Subir Archivo .docx, .xlsx, .pptx, .pdf, .png</InputLabel>
+          <input
+            type="file"
+            name="archivo"
+            id="archivo"
+            onChange={manejarCambio}
+          />
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+            <Button onClick={onCerrar} variant="outlined" color="primary">
+              Cancelar
+            </Button>
+            <Button
+              onClick={manejarGuardarActividad}
+              variant="contained"
+              color="primary"
+            >
+              Guardar
+            </Button>
+          </Box>
+        </Box>
       </Box>
     </Modal>
   );

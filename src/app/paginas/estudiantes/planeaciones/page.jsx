@@ -18,7 +18,7 @@ import Footer from "@/components/footer/footer";
 import Link from "next/link";
 import { getUser } from "@/services/auth";
 
-const API_URL = "https://control-de-tareas-backend-production-222f.up.railway.app/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 function Page() {
   const [user, setUser] = useState(null);
