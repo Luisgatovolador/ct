@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import * as React from 'react';
 import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import AppBar from '@mui/material/AppBar';
@@ -6,12 +6,9 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 
 const pages = [
@@ -28,7 +25,7 @@ function NavbarWithoutLogin() {
 
   const handleCloseNavMenu = (route) => {
     setAnchorElNav(null);
-    router.push(route); 
+    router.push(route);
   };
 
   return (
@@ -65,7 +62,7 @@ function NavbarWithoutLogin() {
             >
               <MenuIcon />
             </IconButton>
-          
+
           </Box>
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
@@ -87,17 +84,25 @@ function NavbarWithoutLogin() {
             Control de Tareas
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            
+
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
             <Button
-              variant="contained"
-              color="primary"
               onClick={() => router.push('/paginas/auth/login')}
+              sx={{
+                my: 2,
+                color: "white",
+                display: "block",
+                '&:hover': {
+                  backgroundColor: "white",
+                  color:"black"
+                },
+              }}
             >
               Login
             </Button>
+
           </Box>
         </Toolbar>
       </Container>

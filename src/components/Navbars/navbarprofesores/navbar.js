@@ -20,10 +20,8 @@ import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
 import { Book } from "@mui/icons-material";
 
 const pages = [
-
   { name: 'Asignaturas', route: '/paginas/profesores/planeaciones' },
   { name: "Calendario", route: "/paginas/profesores/calendario" },
-
 ];
 
 function NavbarProfesor() {
@@ -91,7 +89,7 @@ function NavbarProfesor() {
               textDecoration: "none",
             }}
           >
-            <Book sx={{ mr: 1 }} /> 
+            <Book sx={{ mr: 1 }} />
             CT
           </Typography>
 
@@ -157,7 +155,13 @@ function NavbarProfesor() {
               <Button
                 key={page.name}
                 onClick={() => handleCloseNavMenu(page.route)}
-                sx={{ my: 2, color: "white", display: "block" }}
+                sx={{
+                  my: 2, color: "white", display: "block",
+                  '&:hover': {
+                    backgroundColor: "white",
+                    color: "black"
+                  }
+                }}
               >
                 {page.name}
               </Button>
