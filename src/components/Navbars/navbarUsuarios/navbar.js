@@ -16,6 +16,7 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { getUser, logout } from "@/services/auth";
 import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
+import { Book } from "@mui/icons-material";
 
 const pages = [
   { name: "Asignaturas", route: "/paginas/estudiantes/asignatura" },
@@ -30,12 +31,12 @@ function NavbarAlumno() {
 
   useEffect(() => {
     const fetchedUser = getUser();
-    if(fetchedUser){
+    if (fetchedUser) {
       setUserData(fetchedUser);
     }
   }, []);
 
-  if(!userData){
+  if (!userData) {
     return <NavbarWithoutLogin />
   }
 
@@ -66,6 +67,7 @@ function NavbarAlumno() {
     if (setting === "Logout") {
       logout();
       router.push("/");
+      router.refresh();
     }
   };
 
@@ -73,15 +75,15 @@ function NavbarAlumno() {
     <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
             component="a"
-            href="/paginas/estudiantes/home"
+            href="/"
             sx={{
               mr: 2,
-              display: { xs: "none", md: "flex" },
+              display: "flex",
+              alignItems: "center",
               fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
@@ -89,6 +91,7 @@ function NavbarAlumno() {
               textDecoration: "none",
             }}
           >
+            <Book sx={{ mr: 1 }} />
             CT
           </Typography>
 

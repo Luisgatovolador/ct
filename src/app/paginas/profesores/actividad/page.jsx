@@ -23,9 +23,9 @@ import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import { useParams } from "next/navigation";
 
-const API_URL = "http:localhost:3001/api";
+const API_URL = "http://localhost:3001/api";
 
-const API_URL_PA_IMAGENES = "http:localhost:3001/uploads/";
+const API_URL_PA_IMAGENES = "http://localhost:3001/uploads/";
 
 const Page = () => {
   const [busquedaAlumno, setBusquedaAlumno] = useState("");

@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Box, Grid, Paper, Typography, Accordion, AccordionSummary, AccordionDetails, Button, Modal, TextField, InputLabel, Select, MenuItem } from "@mui/material";
+import { Box, Grid, Paper, Typography, Accordion, AccordionSummary,
+         AccordionDetails, Button, Modal, TextField, InputLabel,
+          Select, MenuItem ,Breadcrumbs
+       } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "@/components/Navbars/navbarprofesores/navbar";
 import Footer from "@/components/footer/footer";
@@ -53,6 +56,7 @@ function Page() {
   const [ModalCrearActividadConjunto, setModalCrearActividadConjunto] = useState(false);
   const [userData, setUserData] = useState(null);
   const [idAsignatura, SetidAsignatura] = useState(null);
+  const [asignatura, setAsignatura] = useState({});
   // Obtener la planeación 
   useEffect(() => {
     const obtenerPlaneacion = async () => {
@@ -73,11 +77,15 @@ function Page() {
             fechaComienzo: data.fechaComienzo.split("T")[0],
             fechaFin: data.fechaFin.split("T")[0],
           });
+          const res = await fetch(`${API_URL}/asignatura/${data.asignatura}`)
+          const daatFormated = await res.json();
+          setAsignatura(daatFormated)
           SetidAsignatura(data.asignatura)
         } catch (error) {
           console.error("Error al obtener la planeación:", error);
         }
       }
+
     };
     obtenerPlaneacion();
   }, [id]);
@@ -243,6 +251,21 @@ function Page() {
   return (
     <>
       <Navbar />
+      <div className="px-44">
+        <Breadcrumbs arial-label="breadcrumb" sx={{ marginTop: 2 }}>
+          <Link underline="hover" color="inherit" href="/">
+            Inicio
+          </Link>
+          <Link
+            underline="hover"
+            color="inherit"
+            href="/paginas/profesores/planeaciones/"
+          >
+            Asignaturas
+          </Link>
+          <Typography sx={{ color: 'text.primary' }}>{asignatura.nombre}</Typography>
+        </Breadcrumbs>
+      </div>
       <br />
       <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <div className="px-44" style={{ flexGrow: 1 }}>
@@ -417,13 +440,13 @@ function Page() {
               </Grid>
             </Grid>
             <ListaActividadesConjuntasCreadas idProfesor={userData.id} />
-            <ListaActividadesConjuntas idProfesor={userData.id}/>
+            <ListaActividadesConjuntas idProfesor={userData.id} />
           </Paper>
         </div>
-      
+
       </Box>
 
-              
+
       <ModalCrearActividad
         abierto={ModalCrearActividadConjunto}
         asignaturaId={idAsignatura}

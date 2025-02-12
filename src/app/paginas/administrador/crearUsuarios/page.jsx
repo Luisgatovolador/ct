@@ -49,7 +49,7 @@ const Page = () => {
     const fetchRoles = async () => {
       try {
         const responseRoles = await fetch(
-          `${API_URL}rol/`
+          `${API_URL}/rol/`
         );
         const dataRoles = await responseRoles.json();
         setRoles(dataRoles);
@@ -64,7 +64,7 @@ const Page = () => {
     const fetchAreas = async () => {
       try {
         const responseAreas = await fetch(
-          `${API_URL}area/`
+          `${API_URL}/area/`
         );
         const dataAreas = await responseAreas.json();
         setAreas(dataAreas);
@@ -80,7 +80,7 @@ const Page = () => {
     const fetchAlumnos = async () => {
       try {
         const response = await fetch(
-          `${API_URL}alumno/`
+          `${API_URL}/alumno/`
         );
         const data = await response.json();
         setAlumnos(data);
@@ -119,7 +119,7 @@ const Page = () => {
       if (modoEdicion) {
         // Actualizar alumno
         const response = await fetch(
-          `${API_URL}alumno/${alumnoAEditar._id}`,
+          `${API_URL}/alumno/${alumnoAEditar._id}`,
           {
             method: "PUT",
             headers: {
@@ -142,7 +142,7 @@ const Page = () => {
       } else {
         // Crear nuevo alumno
         const response = await fetch(
-          `${API_URL}alumno/`,
+          `${API_URL}/alumno/`,
           {
             method: "POST",
             headers: {
@@ -174,7 +174,7 @@ const Page = () => {
   const manejarEliminarAlumno = async (id) => {
     try {
       const response = await fetch(
-        `${API_URL}alumno/${id}`,
+        `${API_URL}/alumno/${id}`,
         {
           method: "DELETE",
         }

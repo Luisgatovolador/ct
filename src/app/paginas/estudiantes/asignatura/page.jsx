@@ -10,6 +10,8 @@ import {
   AccordionDetails,
   Button,
   Modal,
+  Breadcrumbs,
+  Link
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "@/components/Navbars/navbar";
@@ -131,6 +133,14 @@ function Page() {
   return (
     <>
       <Navbar />
+      <div className="px-44">
+        <Breadcrumbs arial-label="breadcrumb" sx={{ marginTop: 2 }}>
+          <Link underline="hover" color="inherit" href="/">
+            Inicio
+          </Link>
+          <Typography sx={{ color: 'text.primary' }}>Asignaturas</Typography>
+        </Breadcrumbs>
+      </div>
       <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <div className="px-44" style={{ flexGrow: 1 }}>
           <Typography variant="h3" component="h2" gutterBottom sx={{ marginTop: '2%', textAlign: 'center', fontWeight: 'bold' }}>
@@ -201,7 +211,7 @@ function Page() {
                             <Typography variant="body2">No tienes actividades entregadas.</Typography>
                           )}
 
-                          <VistaAlumno 
+                          <VistaAlumno
                             idAsignatura={planeacion.asignatura}
                             idAlumno={user.id}
                           />

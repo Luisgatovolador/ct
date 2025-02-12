@@ -1,9 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-
-
 import { useRouter } from "next/navigation";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -18,8 +15,9 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
-import { getUser, logout } from "@/services/auth"; // Asegúrate de importar correctamente
+import { getUser, logout } from "@/services/auth";
 import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
+import { Book } from "@mui/icons-material";
 
 const pages = [
 
@@ -37,12 +35,12 @@ function NavbarProfesor() {
 
   useEffect(() => {
     const fetchedUser = getUser();
-    if(fetchedUser){
+    if (fetchedUser) {
       setUserData(fetchedUser)
     }
   }, []);
 
-  if(!userData){
+  if (!userData) {
     return <NavbarWithoutLogin />
   }
   const settings = [
@@ -69,6 +67,7 @@ function NavbarProfesor() {
     if (setting === "Logout") {
       logout();
       router.push("/");
+      router.refresh()
     }
   };
 
@@ -76,15 +75,15 @@ function NavbarProfesor() {
     <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
             component="a"
-            href="/paginas/profesores/home"
+            href="/"
             sx={{
               mr: 2,
-              display: { xs: "none", md: "flex" },
+              display: "flex",
+              alignItems: "center",
               fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
@@ -92,8 +91,10 @@ function NavbarProfesor() {
               textDecoration: "none",
             }}
           >
+            <Book sx={{ mr: 1 }} /> 
             CT
           </Typography>
+
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton

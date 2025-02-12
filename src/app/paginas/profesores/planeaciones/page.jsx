@@ -12,6 +12,7 @@ import {
   CardActions,
   Modal,
   TextField,
+  Breadcrumbs
 } from "@mui/material";
 import Navbar from "@/components/Navbars/navbarprofesores/navbar";
 import Footer from "@/components/footer/footer";
@@ -58,7 +59,7 @@ function Page() {
         setAsignaturasFiltradas(filteredAsignaturas);
       }
 
-      fetchPlaneaciones(); 
+      fetchPlaneaciones();
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -68,7 +69,7 @@ function Page() {
     try {
       const planeacionesResponse = await fetch(`${API_URL}/planeacion`);
       const planeacionesData = await planeacionesResponse.json();
-      setPlaneaciones(planeacionesData); 
+      setPlaneaciones(planeacionesData);
     } catch (error) {
       console.error("Error al obtener las planeaciones:", error);
     }
@@ -106,7 +107,7 @@ function Page() {
       } else {
         console.error("Error al agregar la planeación:", response.statusText);
       }
-      
+
     } catch (error) {
       console.error("Error al agregar la planeación:", error);
     }
@@ -131,16 +132,26 @@ function Page() {
   return (
     <>
       <Navbar />
+
+      <div className="px-44">
+        <Breadcrumbs arial-label="breadcrumb" sx={{ marginTop: 2 }}>
+          <Link underline="hover" color="inherit" href="/">
+            Inicio
+          </Link>
+          <Typography sx={{ color: 'text.primary' }}>Asignaturas</Typography>
+        </Breadcrumbs>
+
+      </div>
       <br />
       <Box
         sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
       >
         <div className="px-44" style={{ flexGrow: 1 }}>
-        <Typography variant="h4" component="h2" gutterBottom sx={{textAlign: 'center'}}>
-              Asignaturas de {profesorData.nombre}
-            </Typography>
-          <Paper elevation={3} sx={{ padding: 2, width: '120%', marginLeft: '-10% '}}>
-           
+          <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center' }}>
+            Asignaturas de {profesorData.nombre}
+          </Typography>
+          <Paper elevation={3} sx={{ padding: 2, width: '120%', marginLeft: '-10% ' }}>
+
             <div className="grid grid-cols-3 gap-10">
               {asignaturasFiltradas.length > 0 ? (
                 asignaturasFiltradas.map((asignatura) => (
@@ -164,9 +175,8 @@ function Page() {
                     <CardActions>
                       {getPlaneacionesAsignatura(asignatura._id).length > 0 ? (
                         <Link
-                          href={`/paginas/profesores/planeacion/${
-                            getPlaneacionesAsignatura(asignatura._id)[0]._id
-                          }`}
+                          href={`/paginas/profesores/planeacion/${getPlaneacionesAsignatura(asignatura._id)[0]._id
+                            }`}
                         >
                           <Button size="small">Ver más</Button>
                         </Link>

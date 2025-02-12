@@ -3,27 +3,31 @@
 import ImageCarousel from "@/components/carusel/Carusel";
 import * as React from "react";
 import Footer from "@/components/footer/footer";
-import NavbarStandard from "@/components/Navbars/navbarUsuarios/navbar";
-import { Card, CardContent, Typography, Grid, Button } from '@mui/material';
-import { getUser } from "@/services/auth";
-import Navbar from "../Navbars/navbar";
+import { Card, CardContent, Typography, Grid, Button, Link, Breadcrumbs } from '@mui/material';
+import { Margin } from "@mui/icons-material";
+
 
 export default function HomeStandard() {
   return (
     <>
-    <script src="//code.tidio.co/9fhtfgifxdbqzldzttuatuy1oa4f4gwz.js" async></script>
-    
+      <script src="//code.tidio.co/9fhtfgifxdbqzldzttuatuy1oa4f4gwz.js" async></script>
+
       <div className="px-44">
+
+        <Breadcrumbs arial-label="breadcrumb" sx={{marginTop: 2}}>
+            <Typography sx={{ color: 'text.primary' }}>Inicio</Typography>
+        </Breadcrumbs>
+
         <ImageCarousel />
 
         {/* Título antes de las tarjetas */}
         <Typography variant="h3" component="h2" gutterBottom className="mt-12" align="center">
-        CONÓCENOS
+          CONÓCENOS
         </Typography>
 
         <Grid container spacing={4} className="mt-6" >
-          <Grid item xs={12} md={4} sx={{marginLeft:'-2%'}}>
-            <Card sx={{ height: '100%', backgroundColor:"#bfdae2",width:"100%"}}>
+          <Grid item xs={12} md={4} sx={{ marginLeft: '-2%' }}>
+            <Card sx={{ height: '100%', backgroundColor: "#bfdae2", width: "100%" }}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Misión
@@ -39,7 +43,7 @@ export default function HomeStandard() {
           </Grid>
 
           <Grid item xs={12} md={4}  >
-            <Card sx={{ height: '100%' , backgroundColor:"#bfdae2",width:"100%"}}>
+            <Card sx={{ height: '100%', backgroundColor: "#bfdae2", width: "100%" }}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Visión
@@ -55,7 +59,7 @@ export default function HomeStandard() {
           </Grid>
 
           <Grid item xs={12} md={4} >
-            <Card sx={{ height: '100%', backgroundColor:"#bfdae2", width:"110%"}}>
+            <Card sx={{ height: '100%', backgroundColor: "#bfdae2", width: "110%" }}>
               <CardContent>
                 <Typography variant="h5" component="div" gutterBottom>
                   Valores

@@ -16,6 +16,7 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { getUser, logout } from "@/services/auth";
 import NavbarWithoutLogin from "../navbarWithoutLogin/navbar";
+import { Book } from "@mui/icons-material";
 
 const pages = [
   { name: "Asignaturas", route: "/paginas/administrador/asignatura" },
@@ -46,11 +47,11 @@ function NavbarAdmin() {
 
   const settings = userData
     ? [
-        { name: userData.nombre, action: null },
-        { name: "Account", action: null },
-        { name: "Dashboard", action: null },
-        { name: "Logout", action: logout },
-      ]
+      { name: userData.nombre, action: null },
+      { name: "Account", action: null },
+      { name: "Dashboard", action: null },
+      { name: "Logout", action: logout },
+    ]
     : [];
 
   const handleOpenNavMenu = (event) => {
@@ -71,6 +72,7 @@ function NavbarAdmin() {
     if (setting === "Logout") {
       logout();
       router.push("/");
+      router.refresh();
     }
   };
 
@@ -78,15 +80,15 @@ function NavbarAdmin() {
     <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
             component="a"
-            href="/paginas/estudiantes/home"
+            href="/"
             sx={{
               mr: 2,
-              display: { xs: "none", md: "flex" },
+              display: "flex",
+              alignItems: "center",
               fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
@@ -94,6 +96,7 @@ function NavbarAdmin() {
               textDecoration: "none",
             }}
           >
+            <Book sx={{ mr: 1 }} />
             CT
           </Typography>
 

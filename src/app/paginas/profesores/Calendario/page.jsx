@@ -14,12 +14,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Breadcrumbs,
+  Link,
 } from "@mui/material";
 import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
 import { getUser } from "@/services/auth";
 
-const API_URL = "http:localhost:3001/api";
+const API_URL = "http://localhost:3001/api";
 
 // calendario en español
 const locales = {
@@ -55,10 +57,10 @@ const Page = () => {
     descripcion: "",
     fechaInicio: "",
     fechaFin: "",
-    profesorID: "", 
+    profesorID: "",
   });
 
-  const [open, setOpen] = useState(false); 
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fetchedUser = getUser();
@@ -146,6 +148,17 @@ const Page = () => {
   return (
     <>
       <Navbar />
+
+      <div className="px-44">
+        <Breadcrumbs arial-label="breadcrumb" sx={{ marginTop: 2 }}>
+          <Link underline="hover" color="inherit" href="/">
+            Inicio
+          </Link>
+          <Typography sx={{ color: 'text.primary' }}>
+            Calendario
+          </Typography>
+        </Breadcrumbs>
+      </div>
       <br />
       <Container>
         <Typography variant="h4" gutterBottom>

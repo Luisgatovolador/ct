@@ -14,6 +14,8 @@ import {
   MenuItem,
   Modal,
   Box,
+  Breadcrumbs,
+  Link,
 } from "@mui/material";
 import Navbar from "@/components/Navbars/navbar";
 import Footer from "@/components/footer/footer";
@@ -31,7 +33,7 @@ const localizaciones = {
 const localizador = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), 
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
   getDay,
   locales: localizaciones,
 });
@@ -135,6 +137,14 @@ const Pagina = () => {
   return (
     <>
       <Navbar />
+      <div className="px-44">
+        <Breadcrumbs arial-label="breadcrumb" sx={{ marginTop: 2 }}>
+          <Link underline="hover" color="inherit" href="/">
+            Inicio
+          </Link>
+          <Typography sx={{ color: 'text.primary' }}>Calendario</Typography>
+        </Breadcrumbs>
+      </div>
       <br />
       <Container>
         <Typography variant="h4" gutterBottom>
@@ -208,7 +218,7 @@ const Pagina = () => {
                   Fin: {new Date(actividadSeleccionada.fechaFin).toLocaleDateString()}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  {actividadSeleccionada.documento} 
+                  {actividadSeleccionada.documento}
                   <a href={`${URL_API_PARA_IMAGENES}${actividadSeleccionada.archivo}`} target="_blank" rel="noopener noreferrer">
                     <img src="/fileImg.png" alt="Archivo" width={50} />
                   </a>

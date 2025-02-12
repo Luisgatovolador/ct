@@ -1,26 +1,8 @@
 'use client'; // Asegúrate de que está en el lado del cliente
 
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Box,
-  TextField,
-  Paper,
-  Pagination,
-  IconButton,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Checkbox,
-  ListItemText,
-  Snackbar,
-  Alert,
+import {Container,Grid,Card,CardContent,Typography,Button,Box,TextField,Paper,Pagination,
+  IconButton,MenuItem,FormControl,InputLabel,Select,Checkbox,ListItemText,Snackbar,Alert,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
